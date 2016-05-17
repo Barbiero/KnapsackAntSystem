@@ -1,15 +1,15 @@
 IDIR=.
 CC=gcc
-CFLAGS=-I$(IDIR)
+CFLAGS=-I$(IDIR) -g
 
 ODIR=./obj
 
 LIBS=-lm
 
-_DEPS = 
+_DEPS = util.h item.h knapsack.h 
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = main.o 
+_OBJ = main.o util.o item.o knapsack.o
 OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
 
 
