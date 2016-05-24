@@ -187,7 +187,7 @@ void process_cli(int argc, char **argv)
     }
 
     printf("Selected Values:\n");
-    printf("\tWorth: [%d, %d]\n", MIN_VALUE, MAX_VALUE);
+    printf("\tWorth: [%" PRIi32 ", %" PRIi32 "]\n", MIN_VALUE, MAX_VALUE);
     printf("\tRestrictions: { ");
     for(RestrId i = 0; i < NUM_RESTRICTIONS; i++)
     {
@@ -204,15 +204,12 @@ void process_cli(int argc, char **argv)
         printf("%.2f,", k_init.capacity[i]);
     }
     printf(" }\n");
-    printf("\tIterations: %d\n", num_iterations);
-    printf("\tAnts: %d\n", num_ants);
+    printf("\tIterations: %" PRIi32 "\n", num_iterations);
+    printf("\tAnts: %" PRIi32 "\n", num_ants);
     printf("\n");
 
 
 }
-
-
-
 
 int main(int argc, char **argv)
 {
@@ -254,7 +251,7 @@ int main(int argc, char **argv)
             (stop.tv_sec - start.tv_sec),
             labs((stop.tv_usec - start.tv_usec)/1000) );
 
-    printf("Best result found: %d\n", best);
+    printf("Best result found: %" PRIi32 "\n", best);
 
 
 }
