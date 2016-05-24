@@ -1,8 +1,9 @@
 #ifndef __KNAPSACK_H__
-#define __KANPSACK_H__
+#define __KNAPSACK_H__
 
-#include "item.h"
 #include <stdbool.h>
+
+#include "const.h"
 
 struct Knapsack {
     /*
@@ -13,25 +14,35 @@ struct Knapsack {
     /*
      * marks the remaining capacity the sack has
      */
-    double capacity[NUM_RESTRICTIONS];
+    Restr capacity[NUM_RESTRICTIONS];
+
+    /*
+     * worth of the knapsack, aka. the sum of all items worth
+     */
+    Cost worth;
+
+    /*
+     * number of items in the knapsack
+     */
+    size_t num_items;
 };
 
 struct K_item_prob{
-    int itemid;
+    ItemId itemid;
 
-    //cumulative distribution function
-    double cdf;
+    //probability to choose this item
+    Prob prob;
 
-    //fixes exactly 16 bytes
-    int __padding;
+    //padding to complete 16 bytes
+    int32_t __padding;
 };
 
 struct Neighbour {
-    int size; //number of items in the neighbourhood
+    size_t size; //number of items in the neighbourhood
 
     //dynamic structure of all items
     //cap is the allocated size, different from the used size above
-    int cap;
+    size_t cap;
     struct K_item_prob* items;
 };
 
@@ -39,11 +50,12 @@ struct Neighbour {
 
 void Knapsack_init(struct Knapsack*);
 
+bool Knapsack_canAddItem(struct Knapsack*, ItemId);
+void Knapsack_addItem(struct Knapsack*, ItemId);
+
 struct Neighbour *createNeighbour(struct Knapsack*);
 void deleteNeighbour(struct Neighbour*);
 
-int Neighbour_binSearch(struct Neighbour*, double);
-
-int Neighbour_randSelect(struct Neighbour*);
+ItemId Neighbour_randSelect(struct Neighbour*);
 
 #endif
