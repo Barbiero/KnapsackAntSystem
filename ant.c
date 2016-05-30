@@ -16,6 +16,11 @@ void ant_init(struct Ant* ant)
     Knapsack_init(&ant->solution);
 }
 
+void ant_fin(struct Ant *ant __attribute__((unused)) )
+{
+    //destructor
+    //I have a feeling I will need this in the future
+}
 
 
 void ant_buildSolution(struct Ant* ant)
@@ -49,8 +54,7 @@ void ant_updatePheromones(struct Ant* ant)
         if(ant->solution.has_item[i])
         {
             //Critical region!
-            struct Item* item = &universe[i];
-            Item_addPheromone(item, delta);
+            Item_addPheromone(&universe[i], delta);
             //!Critical region
         }
     }

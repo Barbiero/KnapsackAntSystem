@@ -12,10 +12,10 @@
 
 //default values for a knapsack
 struct Knapsack k_init = {
-    {false}, 
-    {3000.0, 10000.0},
-    0,
-    0
+    .has_item = {false}, 
+    .capacity = {3000.0, 10000.0},
+    .worth = (Cost) 0,
+    .num_items = (size_t)0
 };
 
 /**
@@ -24,22 +24,20 @@ struct Knapsack k_init = {
 void Knapsack_init(struct Knapsack *k)
 {
     assert(k != NULL);
-    memcpy(k, &k_init, sizeof(struct Knapsack));
+    memcpy(k, &k_init, sizeof(*k));
 }
 
 bool Knapsack_canAddItem(struct Knapsack *k, ItemId i)
 {
     if(k->has_item[i]) return false;
 
-    struct Item *item = &universe[i];
+    //struct Item *item = &universe[i];
     
     for(RestrId c = 0; c < NUM_RESTRICTIONS; c++)
     {
-        if((k->capacity[c] - item->restrictions[c]) < 0)
-        {
+        if(k->capacity[c] < universe[i].restrictions[c]){
             return false;
         }
-    
     }
 
    return true;
@@ -48,9 +46,6 @@ bool Knapsack_canAddItem(struct Knapsack *k, ItemId i)
 void Knapsack_addItem(struct Knapsack *k, ItemId itemid)
 {
     assert(itemid < NUM_ITEMS);
-
-    //if(!Knapsack_canAddItem(k, itemid))
-      //  return;
     
     for(RestrId c = 0; c < NUM_RESTRICTIONS; c++)
     {
@@ -69,9 +64,9 @@ struct Neighbour *createNeighbour(struct Knapsack *k)
     //allocate only as much space as necessary, multiplying by 2 each time
 
 
-    struct Neighbour *n = malloc(sizeof(struct Neighbour));
+    struct Neighbour *n = malloc(sizeof(*n));
 
-    n->items = malloc(sizeof(struct K_item_prob));
+    n->items = malloc(sizeof(*(n->items)));
     n->size = 0;
     n->cap = 1; //neighbour array capacity
 
@@ -88,16 +83,14 @@ struct Neighbour *createNeighbour(struct Knapsack *k)
         if(j >= n->cap)
         {
             n->cap *= 2;
-            n->items = realloc(n->items, sizeof(struct K_item_prob) * n->cap);
+            n->items = realloc(n->items, sizeof(*(n->items)) * n->cap);
         }
-
-        PherDes pherDes = Item_getPherDesireValues(&universe[i]);
 
         n->items[j] = (struct K_item_prob){
             .itemid = i,
-            .prob = pherDes
+            .prob = universe[i].pdValue
         };
-        sum += pherDes;
+        sum += universe[i].pdValue;
 
         n->size++;
 

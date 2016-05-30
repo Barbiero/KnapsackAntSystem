@@ -22,9 +22,13 @@ struct Item
     Desirability desirability;
 
     Pher pheromone;
+
+    PherDes pdValue;
 };
 
 struct Item universe[NUM_ITEMS];
+
+void Item_updatePdValue(struct Item*);
 
 void Item_addPheromone(struct Item*, Pher);
 void evapPheromones();

@@ -161,23 +161,23 @@ void process_cli(int argc, char **argv)
                     printf("Options:\n");
                     printf("\t--min_value <value>: Set minimum item worth\n");
                     printf("\t--max_value <value>: Set maximum item worth\n");
-                    printf("\t--min_restrictions '<value> <value>': %s",
+                    printf("\t--min_restrictions '<value> <value>': "
                             "minimum value of item restrictions\n");
-                    printf("\t--max_restrictions '<value> <value>': %s",
+                    printf("\t--max_restrictions '<value> <value>': "
                             "maximum value of item restrictions\n");
-                    printf("\t--pheromone '<initial> <max>': %s",
+                    printf("\t--pheromone '<initial> <max>': "
                            "set values for pheromones\n");
-                    printf("\t--evaporate <value>: %s",
+                    printf("\t--evaporate <value>: "
                             "evaporation coeficient\n");
-                    printf("\t--alpha <value>: %s",
+                    printf("\t--alpha <value>: "
                             "how strong pheromone is\n");
-                    printf("\t--beta <value>: %s",
+                    printf("\t--beta <value>: "
                             "how strong items desirability is\n");
-                    printf("\t--knap_cap '<value <value>': %s",
+                    printf("\t--knap_cap '<value <value>': "
                             "set capacity size for knapsacks\n");
-                    printf("\t--iterations <value>: %s",
+                    printf("\t--iterations <value>: "
                             "set number of iterations of the ant system\n");
-                    printf("\t--ants <value>: %s",
+                    printf("\t--ants <value>: "
                             "set number of ants of the ant system\n");
                     exit(0);
                 }
@@ -214,13 +214,14 @@ void process_cli(int argc, char **argv)
 int main(int argc, char **argv)
 {
 
+    setbuf(stdout, NULL);
+
     //read CLI options
     process_cli(argc, argv);
 
+    create_universe();
 
     struct timeval start, stop;
-
-    create_universe();
     gettimeofday(&start, NULL);
 
     //millisecond value of system clock to seed the RNG
@@ -229,11 +230,12 @@ int main(int argc, char **argv)
     Cost best = 0;
     int32_t it = num_iterations;
 
-    gettimeofday(&start, NULL);
     printf("Ant system starting\n");
+    
+    gettimeofday(&start, NULL);
+    struct Ant ants[num_ants];
     while(it-- > 0){
-        //100 ants, 1 iteration
-        struct Ant ants[num_ants];
+        //struct Ant ants[num_ants];
         for(int32_t x = 0; x < num_ants; x++){
             ant_init(&ants[x]);
             ant_buildSolution(&ants[x]);
@@ -242,11 +244,20 @@ int main(int argc, char **argv)
         }
 
         evapPheromones();
+
         for(int32_t x = 0; x < num_ants; x++){
             ant_updatePheromones(&ants[x]);
+            ant_fin(&ants[x]);
+        }
+
+        //Update Pheromone * Desirability values all around
+        //Only need to do this after all pheromones were updated
+        for(ItemId i = 0; i < NUM_ITEMS; i++){
+            Item_updatePdValue(&universe[i]);
         }
     }
     gettimeofday(&stop, NULL);
+
     printf("Ant system finished in %lis %lims\n",
             (stop.tv_sec - start.tv_sec),
             labs((stop.tv_usec - start.tv_usec)/1000) );

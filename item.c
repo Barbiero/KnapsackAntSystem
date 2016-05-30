@@ -38,7 +38,6 @@ void Item_init(struct Item* item)
     //Except for its pheromone
     item->pheromone = PHE_INIT;
 }
-
 /**
  * Returns the desirability based on value and the restrictions
  * value / sum(restriction/restricition_range)
@@ -54,6 +53,14 @@ Desirability get_desirability(Cost value, Restr rest[NUM_RESTRICTIONS])
     return d;
 }
 
+void Item_updatePdValue(struct Item *i)
+{
+    i->pdValue = (PherDes)(
+        (Desirability)pow(i->desirability, DES_WEIGHT) *
+        (Pher)pow(i->pheromone, PHE_WEIGHT)
+        );
+}
+
 /**
  * Randomizes an item's attributes
  */
@@ -61,14 +68,16 @@ void Item_rand(struct Item* i)
 {
     //Assuming seed was already initialized
 
-    (*i).value = rand_int(MIN_VALUE, MAX_VALUE);
+    i->value = (Cost)rand_int(MIN_VALUE, MAX_VALUE);
     for(RestrId j = 0; j < NUM_RESTRICTIONS; j++)
     {
-        (*i).restrictions[j] = (Restr)rand_double(MIN_REST[j], MAX_REST[j]);
+        i->restrictions[j] = (Restr)rand_double(MIN_REST[j], MAX_REST[j]);
     }
 
     //calc desirability
-    (*i).desirability = get_desirability((*i).value, (*i).restrictions);
+    i->desirability = get_desirability(i->value, i->restrictions);
+
+    Item_updatePdValue(i);
 }
 
 void Item_addPheromone(struct Item *i, Pher delta)
@@ -94,10 +103,7 @@ void evapPheromones()
 
 PherDes Item_getPherDesireValues(struct Item *i)
 {
-    Pher pherVal = (Pher)pow(i->pheromone, PHE_WEIGHT);
-    Desirability desVal = (Desirability)pow(i->desirability, DES_WEIGHT);
-
-    return (PherDes)(pherVal * desVal);
+   return i->pdValue;
 }
 
 int desire_order(const void* a, const void* b)
@@ -105,7 +111,15 @@ int desire_order(const void* a, const void* b)
     const struct Item* iA = (struct Item*)a;
     const struct Item* iB = (struct Item*)b;
 
-    return iB->desirability - iA->desirability;
+    Restr rA = 0.0, rB = 0.0;
+    for(RestrId c = 0; c < NUM_RESTRICTIONS; c++)
+    {
+        rA += iA->restrictions[c];
+        rB += iB->restrictions[c];
+    }
+
+
+    return rA - rB;
 }
 
 //universe is the set of all items in the system

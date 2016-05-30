@@ -10,6 +10,7 @@ struct Ant {
 
 
 void ant_init(struct Ant*);
+void ant_fin(struct Ant*);
 void ant_buildSolution(struct Ant*);
 void ant_updatePheromones(struct Ant*);
 

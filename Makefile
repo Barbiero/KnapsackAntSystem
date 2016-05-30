@@ -1,6 +1,6 @@
 IDIR=.
 CC=gcc
-CFLAGS=-I$(IDIR) -g -Wall -Wextra -pedantic
+CFLAGS=-I$(IDIR) -pg -Wall -Wextra -pedantic
 
 ODIR=./obj
 
