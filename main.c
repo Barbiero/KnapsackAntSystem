@@ -9,9 +9,11 @@
 #include "item.h"
 #include "knapsack.h"
 #include "util.h"
+#include "universe.h"
 
 int32_t num_iterations = 200;
 int32_t num_ants = 100;
+bool use_predef_universe = true;
 
 void process_cli(int argc, char **argv)
 {
@@ -51,6 +53,7 @@ void process_cli(int argc, char **argv)
                 {
                     if(optarg){
                         MIN_VALUE = atoi(optarg);
+                        use_predef_universe = false;
                     }
                 }
                 break;
@@ -58,6 +61,7 @@ void process_cli(int argc, char **argv)
                 {
                     if(optarg){
                         MAX_VALUE = atoi(optarg);
+                        use_predef_universe = false;
                     }
                 }
                 break;
@@ -72,7 +76,8 @@ void process_cli(int argc, char **argv)
 
                         optarg = end;
                         MIN_REST[i] = f;
-                    }                    
+                    }
+                    use_predef_universe = false; 
                 }
                 break;
             case 'R':
@@ -87,6 +92,7 @@ void process_cli(int argc, char **argv)
 
                         MAX_REST[i] = f;
                     }
+                    use_predef_universe = false;
                 }
                 break;
             case 'p':
@@ -103,6 +109,7 @@ void process_cli(int argc, char **argv)
                         optarg = end;
                         PHE_MAX = p;
 
+                        use_predef_universe = false;
                     }
                 }
                 break;
@@ -110,6 +117,7 @@ void process_cli(int argc, char **argv)
                 {
                     if(optarg){
                         PHE_EVAP = atof(optarg);
+                        use_predef_universe = false;
                     }
                 }
                 break;
@@ -117,6 +125,7 @@ void process_cli(int argc, char **argv)
                 {
                     if(optarg){
                         PHE_WEIGHT = atof(optarg);
+                        use_predef_universe = false;
                     }
                 }
                 break;
@@ -124,6 +133,7 @@ void process_cli(int argc, char **argv)
                 {
                     if(optarg){
                         DES_WEIGHT = atof(optarg);
+                        use_predef_universe = false;
                     }
                 }
                 break;
@@ -139,6 +149,7 @@ void process_cli(int argc, char **argv)
 
                         k_init.capacity[i] = f;
                     }
+                    use_predef_universe = false;
                 }
                 break;
             case 'i':
@@ -219,7 +230,32 @@ int main(int argc, char **argv)
     //read CLI options
     process_cli(argc, argv);
 
-    create_universe();
+    if(!use_predef_universe)
+        create_universe();
+
+/*
+    FILE *f = fopen("universe.txt", "w");
+
+    fprintf(f, "universe[] = { \n");
+    for(ItemId i = 0; i < NUM_ITEMS; i++)
+    {
+        fprintf(f, "{.value = %" PRIi32 ",", universe[i].value);
+        fprintf(f, ".restrictions = {");
+        for(RestrId j = 0; j < NUM_RESTRICTIONS; j++)
+        {
+            fprintf(f, "%lf", universe[i].restrictions[j]);
+            if(j < NUM_RESTRICTIONS-1) fprintf(f, ",");
+        }
+
+        fprintf(f, "},");
+        fprintf(f, ".desirability = %lf,", universe[i].desirability);
+        fprintf(f, ".pheromone = %lf,", universe[i].pheromone);
+        fprintf(f, ".pdValue = %lf}", universe[i].pdValue);
+        if(i < NUM_ITEMS-1) fprintf(f, ",\n");
+    }
+    fprintf(f, "\n}\n");
+    fclose(f);
+*/
 
     struct timeval start, stop;
     gettimeofday(&start, NULL);

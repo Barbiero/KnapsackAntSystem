@@ -40,7 +40,7 @@ void Item_init(struct Item* item)
 }
 /**
  * Returns the desirability based on value and the restrictions
- * value / sum(restriction/restricition_range)
+ * value / prod(restriction/restricition_range)
  */
 Desirability get_desirability(Cost value, Restr rest[NUM_RESTRICTIONS])
 {
