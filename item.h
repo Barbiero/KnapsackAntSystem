@@ -33,8 +33,6 @@ void Item_updatePdValue(struct Item*);
 void Item_addPheromone(struct Item*, Pher);
 void evapPheromones();
 
-PherDes Item_getPherDesireValues(struct Item*);
-
 void create_universe();
 
 #endif

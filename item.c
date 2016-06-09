@@ -101,11 +101,6 @@ void evapPheromones()
     }
 }
 
-PherDes Item_getPherDesireValues(struct Item *i)
-{
-   return i->pdValue;
-}
-
 int desire_order(const void* a, const void* b)
 {
     const struct Item* iA = (struct Item*)a;
