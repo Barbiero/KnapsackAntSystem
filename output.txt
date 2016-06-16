@@ -1,0 +1,126 @@
+Selected Values:
+	Worth: [1, 100]
+	Restrictions: { [0.50, 100.00],[100.00, 2000.00], }
+	Pheromone: initial: 40.00 max: 100.00
+	Evap coef: 0.05
+	Alpha: 0.10 Beta: 1.50
+	Knapsack Capacities:
+		{ 3000.00,10000.00, }
+	Iterations: 1000
+	Ants: 400
+
+Ant system starting
+Ant system finished in 20s 172ms
+Best result found: 1708
+Selected Values:
+	Worth: [1, 100]
+	Restrictions: { [0.50, 100.00],[100.00, 2000.00], }
+	Pheromone: initial: 40.00 max: 100.00
+	Evap coef: 0.05
+	Alpha: 0.10 Beta: 1.50
+	Knapsack Capacities:
+		{ 3000.00,10000.00, }
+	Iterations: 1000
+	Ants: 400
+
+Ant system starting
+Ant system finished in 20s 69ms
+Best result found: 1694
+Selected Values:
+	Worth: [1, 100]
+	Restrictions: { [0.50, 100.00],[100.00, 2000.00], }
+	Pheromone: initial: 40.00 max: 100.00
+	Evap coef: 0.05
+	Alpha: 0.10 Beta: 1.50
+	Knapsack Capacities:
+		{ 3000.00,10000.00, }
+	Iterations: 1000
+	Ants: 400
+
+Ant system starting
+Ant system finished in 20s 332ms
+Best result found: 1752
+Selected Values:
+	Worth: [1, 100]
+	Restrictions: { [0.50, 100.00],[100.00, 2000.00], }
+	Pheromone: initial: 40.00 max: 100.00
+	Evap coef: 0.05
+	Alpha: 0.10 Beta: 1.50
+	Knapsack Capacities:
+		{ 3000.00,10000.00, }
+	Iterations: 1000
+	Ants: 400
+
+Ant system starting
+Ant system finished in 19s 520ms
+Best result found: 1738
+Selected Values:
+	Worth: [1, 100]
+	Restrictions: { [0.50, 100.00],[100.00, 2000.00], }
+	Pheromone: initial: 40.00 max: 100.00
+	Evap coef: 0.05
+	Alpha: 0.10 Beta: 1.50
+	Knapsack Capacities:
+		{ 3000.00,10000.00, }
+	Iterations: 1000
+	Ants: 400
+
+Ant system starting
+Ant system finished in 20s 625ms
+Best result found: 1726
+Selected Values:
+	Worth: [1, 100]
+	Restrictions: { [0.50, 100.00],[100.00, 2000.00], }
+	Pheromone: initial: 40.00 max: 100.00
+	Evap coef: 0.05
+	Alpha: 0.10 Beta: 1.50
+	Knapsack Capacities:
+		{ 3000.00,10000.00, }
+	Iterations: 1000
+	Ants: 400
+
+Ant system starting
+Ant system finished in 19s 326ms
+Best result found: 1786
+Selected Values:
+	Worth: [1, 100]
+	Restrictions: { [0.50, 100.00],[100.00, 2000.00], }
+	Pheromone: initial: 40.00 max: 100.00
+	Evap coef: 0.05
+	Alpha: 0.10 Beta: 1.50
+	Knapsack Capacities:
+		{ 3000.00,10000.00, }
+	Iterations: 1000
+	Ants: 400
+
+Ant system starting
+Ant system finished in 19s 487ms
+Best result found: 1710
+Selected Values:
+	Worth: [1, 100]
+	Restrictions: { [0.50, 100.00],[100.00, 2000.00], }
+	Pheromone: initial: 40.00 max: 100.00
+	Evap coef: 0.05
+	Alpha: 0.10 Beta: 1.50
+	Knapsack Capacities:
+		{ 3000.00,10000.00, }
+	Iterations: 1000
+	Ants: 400
+
+Ant system starting
+Ant system finished in 20s 522ms
+Best result found: 1721
+Selected Values:
+	Worth: [1, 100]
+	Restrictions: { [0.50, 100.00],[100.00, 2000.00], }
+	Pheromone: initial: 40.00 max: 100.00
+	Evap coef: 0.05
+	Alpha: 0.10 Beta: 1.50
+	Knapsack Capacities:
+		{ 3000.00,10000.00, }
+	Iterations: 1000
+	Ants: 400
+
+Ant system starting
+Ant system finished in 19s 299ms
+Best result found: 1701

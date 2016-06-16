@@ -26,7 +26,7 @@ struct Item
     PherDes pdValue;
 };
 
-extern struct Item universe[NUM_ITEMS];
+extern struct Item *universe;
 
 void Item_updatePdValue(struct Item*);
 

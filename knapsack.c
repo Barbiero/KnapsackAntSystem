@@ -12,7 +12,7 @@
 
 //default values for a knapsack
 struct Knapsack k_init = {
-    .has_item = {false}, 
+    .has_item = NULL, 
     .capacity = {3000.0, 10000.0},
     .worth = (Cost) 0,
     .num_items = (size_t)0
@@ -25,6 +25,14 @@ void Knapsack_init(struct Knapsack *k)
 {
     assert(k != NULL);
     memcpy(k, &k_init, sizeof(*k));
+
+    k->has_item = calloc(sizeof(bool), NUM_ITEMS);
+}
+
+void Knapsack_destroy(struct Knapsack *k)
+{
+    assert(k != NULL);
+    free(k->has_item);
 }
 
 bool Knapsack_canAddItem(struct Knapsack *k, ItemId i)

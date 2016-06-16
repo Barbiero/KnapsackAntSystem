@@ -12,6 +12,10 @@ struct Ant {
 void ant_init(struct Ant*);
 void ant_fin(struct Ant*);
 void ant_buildSolution(struct Ant*);
+
+void ant_getDeltaPherMatrix(struct Ant*, Pher*[]);
+void ant_updPheromonesMatrix(Pher*[]);
+
 void ant_updatePheromones(struct Ant*);
 
 #endif

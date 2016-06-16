@@ -1,0 +1,1 @@
+./main --min_restrictions '0.5 10.0' --max_restrictions '1000.0 50000.0' --knap-cap '10000 200000' --items 10000 --iterations 600

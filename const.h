@@ -38,7 +38,7 @@ typedef float64 PherDes;
 
 
 //Number of items in the universe
-#define NUM_ITEMS 300
+extern ItemId NUM_ITEMS;
 //Number of Restrictions for each item
 #define NUM_RESTRICTIONS 2
 
@@ -69,6 +69,10 @@ extern float64 DES_WEIGHT;
 
 //Default knapsack struct
 extern struct Knapsack k_init;
+
+#ifdef THREADED
+extern pthread_mutex_t itemMut;
+#endif
 
 #endif
 

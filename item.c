@@ -8,6 +8,10 @@
 #include <math.h>
 #include <tgmath.h>
 
+#ifdef THREADED
+#include <pthread.h>
+#endif
+
 #include "assert.h"
 #include "const.h"
 #include "item.h"
@@ -28,7 +32,8 @@ float64 PHE_EVAP = 0.05;
 float64 PHE_WEIGHT = 0.1;
 float64 DES_WEIGHT = 1.5;
 
-
+ItemId NUM_ITEMS = 300;
+struct Item *universe = NULL;
 
 void Item_init(struct Item* item)
 {
@@ -80,13 +85,23 @@ void Item_rand(struct Item* i)
     Item_updatePdValue(i);
 }
 
+#ifdef THREADED
+pthread_mutex_t itemMut;
+#endif
+
 void Item_addPheromone(struct Item *i, Pher delta)
 {
+#ifdef THREADED
+    pthread_mutex_lock(&itemMut);
+#endif
     i->pheromone = (Pher)fmin(i->pheromone + delta, PHE_MAX);
+#ifdef THREADED
+    pthread_mutex_unlock(&itemMut);
+#endif
 }
 
 
-void Item_evapPheromone(struct Item *i)
+inline void Item_evapPheromone(struct Item *i)
 {
     i->pheromone *= (1 - PHE_EVAP);
 }
@@ -121,6 +136,8 @@ int desire_order(const void* a, const void* b)
 
 void create_universe()
 {
+    universe = (struct Item*)malloc(sizeof(*universe) * NUM_ITEMS);
+
     for(ItemId i = 0; i < NUM_ITEMS; i++)
     {
         Item_init(&universe[i]);

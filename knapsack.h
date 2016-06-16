@@ -9,7 +9,7 @@ struct Knapsack {
     /*
      * Marks wether or not the sack contains an item
      */
-    bool has_item[NUM_ITEMS];
+    bool *has_item;
 
     /*
      * marks the remaining capacity the sack has
@@ -49,6 +49,7 @@ struct Neighbour {
 
 
 void Knapsack_init(struct Knapsack*);
+void Knapsack_destroy(struct Knapsack*);
 
 bool Knapsack_canAddItem(struct Knapsack*, ItemId);
 void Knapsack_addItem(struct Knapsack*, ItemId);

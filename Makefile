@@ -1,16 +1,16 @@
 IDIR=.
 CC=gcc
-CFLAGS=-I$(IDIR) -pg -Wall -Wextra -pedantic
-
+CFLAGS=-I$(IDIR)  -Wall -Wextra -pedantic -O2 -DTHREADED
+ 
 ODIR=./obj
 
-LIBS=-lm
+LIBS=-lm -lpthread
 
-_DEPS = util.h item.h knapsack.h ant.h const.h 
+_DEPS = util.h item.h knapsack.h ant.h const.h barrier.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJ = main.o util.o item.o knapsack.o ant.o
-OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
+OBJNAMES = main.o util.o item.o knapsack.o ant.o barrier.o
+OBJ = $(patsubst %,$(ODIR)/%,$(OBJNAMES))
 
 
 $(ODIR)/%.o: %.c $(DEPS)
