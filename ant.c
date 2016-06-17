@@ -16,7 +16,7 @@ void ant_init(struct Ant* ant)
     Knapsack_init(&ant->solution);
 }
 
-void ant_fin(struct Ant *ant __attribute__((unused)) )
+void ant_fin(struct Ant *ant)
 {
     //destructor
     Knapsack_destroy(&ant->solution);

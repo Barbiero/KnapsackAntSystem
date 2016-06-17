@@ -74,9 +74,11 @@ struct Neighbour *createNeighbour(struct Knapsack *k)
 
     struct Neighbour *n = malloc(sizeof(*n));
 
-    n->items = malloc(sizeof(*(n->items)));
+    //n->items = malloc(sizeof(*(n->items)));
+    n->items = malloc(sizeof(*n->items)*NUM_ITEMS);
     n->size = 0;
-    n->cap = 1; //neighbour array capacity
+    //n->cap = 1; //neighbour array capacity
+    n->cap = NUM_ITEMS;
 
     size_t j = 0; //neighbour iterator
 
@@ -88,11 +90,13 @@ struct Neighbour *createNeighbour(struct Knapsack *k)
             continue;
         }
 
+        /*
         if(j >= n->cap)
         {
             n->cap *= 2;
             n->items = realloc(n->items, sizeof(*(n->items)) * n->cap);
         }
+        */
 
         n->items[j] = (struct K_item_prob){
             .itemid = i,
