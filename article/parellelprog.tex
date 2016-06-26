@@ -1,0 +1,38 @@
+\section{Paralelização de Algoritmos}
+Algoritmos sequenciais podem tomar vantagem das arquiteturas atuais de processadores e executar suas operações de forma concorrente com a ajuda de certas bibliotecas de programação. Neste trabalho foi-se utilizada a bilbioteca \texttt{pthreads.h} na linguagem {\tt C}. Nesta seção, serão explicados alguns mecanismos que são necessários para paralelizar um algoritmo que normalmente seria sequencial.
+
+\subsection{Threads}
+Em um fluxo de execução comum, o \textit{processo} irá chamar uma função inicial(normalmente {\tt main}) e então seguir o código sequencialmente a partir da chamada da função até que seu fluxo de execução seja finalizado - via uma chamada de retorno da função {\tt main}, chamada da função {\tt exit} ou mesmo por uma interrupção externa. Entretanto, utilizando-se de uma biblioteca de paralelização e chamadas específicas ao sistema operacional, é possível criar \textit{threads}, que são fluxos de execução que não são necessariamente executados em sequencia. Estas threads irão então seguir seu fluxo de execução independentes entre si, aproveitando as arquiteturas de multi-processadores para que o código ocorra em paralelo.
+
+\subsection{Memória compartilhada e condiçoes de corrida}
+Quando se trata de um código paralelo, a memória pode - ou não - ser compartilhada, dependendo da implementação do mesmo. Com {\tt pthreads}, a memória do \textit{stack} do programa é compartilhada entre si, o que permite a diferentes Threads se comunicarem ou acessarem informações globais entre si. Existe, porém um problema quando a memória entre threads é compartilhada: condições de corrida(\textit{race conditions}).
+
+Quando duas threads tentam acessar e manipular uma mesma variável ao mesmo tempo, condições de corrida podem ocorrer. Suponha que duas threads, $T_0$ e $T_1$, tentem executar a operação $a_{++}$. Esta operação pode ser expandida desta forma:
+\begin{align}
+	i \gets& a \nonumber\\
+	i \gets& i+1 \nonumber\\
+	a \gets& i \nonumber
+\end{align}
+
+Onde $i$ é um registrador do processador. Se, por exemplo, $T_0$ e $T_1$ executam estas instruções ao mesmo tempo, quando chegarem na terceira linha $a \gets i$, a variável $a$ receberá o valor $a+1$, mesmo que duas Threads tenham executado a operação de incremento. Para que isto não ocorra, torna-se necessário o uso de instrumentos de controle de concorrência, chamados de \textbf{locks}.
+
+\subsection{Locks}
+\textbf{Lock} ou \textbf{Mutually exclusive lock}(\texttt{mutex\_lock}) é uma instrução que determina uma \textit{região crítica} para que duas threads não possam acessar esta região crítica ao mesmo tempo. Assim, no exemplo acima, o operador $a_{++}$ poderia ser implementado como
+\begin{align}
+lock()\quad&\nonumber\\
+i\gets& a\nonumber\\
+i\gets& i+1\nonumber\\
+a\gets& i\nonumber\\
+unlock()&\nonumber
+\end{align}
+Neste exemplo, se $T_0$ começar a executar a instrução, ele irá adquirir a trava da região crítica, enquanto $T_1$ irá pausar sua execução na função \texttt{lock()}, até que $T_0$ libere a trava com a função \texttt{unlock()} e permita que $T_1$ adquiria a trava da região crítica, o que irá impedir outra thread de acessar esta região até que $T_1$ a libere.
+
+No padrão \texttt{C11}, a \textit{keyword} \texttt{\_Atomic} determina que uma variável é uma região crítica, e quaisquer operações feitas sobre esta variável são implicitamente atômicas - efetivamente agindo como se existissem \textit{locks} sobre estas variáveis. Com a biblioteca \texttt{pthreads}, o uso de funções como \texttt{pthread\_mutex\_lock} e \texttt{pthread\_mutex\_unlock} permite um controle maior de regiões críticas, não se limitando apenas a operações de uma variável.
+
+\subsection{Barreiras}
+Além dos locks, outra forma de controle de concorrência é a barreira. Barreiras são estruturas que determinam um ponto do programa em que uma thread deve esperar até que $n$ threads atinjam este ponto, onde $n$ é um número especificado para a barreira, normalmente sendo igual ao número de Threads que são relacionadas àquele ponto em específico.
+
+Barreiras podem ser implementadas de diferentes formas; no programa anexado a este trabalho, uma forma particular de barreira chamada \textbf{Tree Barrier} foi implementada, onde a a barreira é organizada na forma de uma árvore, em que cada thread está em um nó-folha da árvore e quando esta thread chega no ponto da barreira, ela irá informar o nó pai. Quando o pai das folhas verifica que todas as folhas informaram que a barreira terminou, este irá informar o seu pai até que a raiz note que todas as folhas tenham chegado no ponto de execução desejado, então liberando-as automaticamente.
+
+\subsection{Leituras Adicionais}
+O tópico de paralelização é muito mais extenso do que o escopo deste trabalho. Recomenda-se a leitura de outras fontes como \url{https://computing.llnl.gov/tutorials/parallel\_comp/}\cite{parallelcomp:website}.

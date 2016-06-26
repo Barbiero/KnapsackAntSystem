@@ -1,0 +1,24 @@
+\begin{thebibliography}{1}
+
+\bibitem{parallelcomp:website}
+{\sc Barney, B.}
+\newblock Introduction to parallel computing, 2016.
+
+\bibitem{antsystem}
+{\sc Dorigo, M., and Stützle, T.}
+\newblock {\em Ant Colony Optimization}.
+
+\bibitem{acomkp}
+{\sc Fidanova, S.}
+\newblock {\em Ant Colony Optimization and Multiple Knapsack Problem}.
+
+\bibitem{complexity}
+{\sc Gens, G., and Levner, E.}
+\newblock {\em Complexity of approximation algorithms for combinatorial
+  problems: a survey}.
+
+\bibitem{aco:schiff}
+{\sc Schiff, K.}
+\newblock Ant colony optimization algorithm for the 0-1 knapsack problem.
+
+\end{thebibliography}

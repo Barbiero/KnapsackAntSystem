@@ -1,0 +1,6 @@
+\section{Introdução}
+	O algoritmo de otimização da colônia de formigas(sigla em inglês, {\it ACO}) é uma heurística baseada em probabilidade no qual se baseia no conceito de formigas que buscam alimentos e deixam trilhas de feromônio para que outras formigas encontrem este mesmo alimento\cite{antsystem}. Em termos de computacionais, considera-se que as \textit{formigas} são elementos que irão atravessar um grafo de um problema, enquanto a \textit{comida} será uma solução válida para este problema, tal que as formigas irão encontrar uma solução boa(e possívelmente, ótima) para o dado problema.
+	
+	O problema em questão é nomeado \textit{Problema da Mochila de Múltiplas Restrições}, em inglês \textit{Multiple Knapsack Problem}. Este problema é uma variação do problema da mochila onde cada nó do grafo do problema representa um estado da mochila, e cada aresta representa a introdução de um novo item na mochila. Este problema foi mostrado como NP-Completo por Gens, G\cite{complexity}.
+	
+	Neste trabalho, iremos utilizar o \textit{ACO} para resolver o problema em questão, e então melhorar o tempo de solução do problema paralelizando alguns de seus passos, de tal forma que ele continue resolvendo o problema da mesma forma porém tirando vantagem das arquiteturas multi-processadoras atuais.

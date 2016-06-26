@@ -1,0 +1,197 @@
+\section{Aplicando o Problema da Mochila ao Ant System}
+No Problema da Mochila, soluções válidas podem ser interpretados como estados em que a mochila se encontra. Assim, uma mochila começa em um estado inicial onde suas capacidades $C_k$ estão em seu valor máximo, e nenhum item está adicionado à mochila.
+
+A transição de estados da mochila é dada pela adição de um novo item na mesma; Ao adicionar um novo item, as restrições $C_k$ são reduzidas de acordo com os atributos do item $i$, e o valor da mochila, e portanto qualidade da solução, cresce de acordo com $v_i$(o valor de $i$). Se um item possui uma restrição $w_{ik}>C_k$, então a mochila não pode adicionar este item nela - o que significa que o estado em que a mochila se encontra não é ligado à aresta a qual este item é representado.
+
+Levando então a consideração de que o estado da mochila é um nó, e o item é uma aresta, basta determinar uma fórmula para a atratividade $\mu$ dos itens.
+
+Como o intuito deste trabalho é mostrar a paralelização do \textit{ACO}, não foi feito uma análise extensa sobre qual $\mu$ provém os melhores resultados em menos iterações. Usaremos então uma fórmula baseada no trabalho de Schiff, K\cite{aco:schiff}, a qual é simples de calcular:
+$$
+	\mu_j = \dfrac{v_j}{
+		\prod r_{ij}}
+$$
+Onde $r_{ij}$ são todas as restrições de um item $j$ e $v_j$ é o valor do item $j$.
+
+Dado então um número de iterações $iter$, um número de formigas $ants$ e um número de itens $n$ onde cada item possui $m$ restrições e um valor $v_j$, um valor inicial de feromônio $\varphi$ e um valor máximo de feromônio $\varphi_{\max}$, assim como capacidade máxima da mochila $C_k$, $0<k<m$, constrói-se o algoritmo final no Algoritmo \ref{acoseq}.
+
+\begin{algorithm}[ht]
+	\KwIn{\\
+		$iter$: Número de iterações do sistema\\
+		$ants$: Número de formigas do sistema\\
+		$n$: Número de itens\\
+		$m$: Número de restrições\\
+		$C_k, 0<k<m$: Capacidade da mochila\\
+		$v_j, 0<j<n$: Valor do item $j$\\
+		$r_{ij}, 0<j<n, 0<i<m$: Restrição $i$ do item $j$\\
+		$\mu_j = \dfrac{v_j}{
+			\prod r_{ij}}$: Atratividade do item $j$\\
+		$\varphi, \varphi_{\max}$: Valor inicial e máximo de feromônio\\
+		$\rho$: Coeficiente de evaporação do feromônio\\
+		$\alpha$: Peso que o feromônio tem sobre a seleção dos itens\\
+		$\beta$: Peso que a atratividade tem sobre a seleção dos itens\\
+	}
+	
+	\KwOut{$S$: estado da mochila na solução final}
+	$best = \emptyset$\;
+	$\forall_{0<j<n} \tau_j \gets \varphi$\;
+	\While{$iter{-}{-} > 0$ }{
+		$best_x\gets\emptyset \qquad \forall_{0<x<ants}$\;
+		\BlankLine
+		\textit{//Buscar uma solução}\;
+		\For{$x\gets 0 $\textbf{ to }$ ants$}{
+			$solucao\gets constroi\_solucao()$\;
+			\If{($solucao > best_x$)}{$best_x\gets solucao$}
+			\If{($solucao > best$)}{$best\gets solucao$}	
+		}
+		\BlankLine
+		\textit{//Atualizar feromonio}\;
+		\For{$j\gets0$ \textbf{to} $n$}{
+			$\tau_j \gets \tau_j * \rho$\;
+		}
+		\For{$x\gets0$ \textbf{to} $ ants$}{
+			\ForEach{$i$: Item $\in best_x$}{
+				$\tau_i \gets \Delta\tau(best_x)$\;	
+			}
+		}
+		
+		Atualizar $\tau_j^\alpha \mu_j^\beta$ para cada item\;
+	}
+	return $best$\;
+	\caption{Algoritmo sequencial para o ACO}
+	\label{acoseq}
+\end{algorithm} 
+
+\section{Paralelização do \textit{ACO}}
+A forma mais intuitiva de se paralelizar o \textit{ACO} é em paralelizar as formigas, ou seja, enviar as formigas em \textit{threads} separadas para que trabalhem de forma concorrente. Durante a construção de solução, não existem problemas de concorrência: variáveis globais como $\tau_i$ não são modificadas.
+
+\subsection{Regiões críticas}
+Nota-se também que o algoritmo sequencial(\ref{acoseq}) possui 4 estágios bem definidos: Construção de soluções, Evaporação de feromônio, Atualização de feromônio e Atualização da probabilidade de escolha $\tau_j^\alpha \mu_j^\beta$. Existe também uma ordem específica em que cada um destes estágios precisam ocorrer: Não se pode evaporar o feromônio antes de terminar de construir as soluções, pois estas são dependentes do feromônio. Também não se pode atualizar o feromônio antes da evaporação pois isto mudará o valor final da operação; e com certeza não se pode atualizar o feromônio \textit{durante} a evaporação. Também não se pode atualizar $\tau_j^\alpha \mu_j^\beta$ antes que o feromônio esteja completamente atualizado, e não se pode construir uma nova solução antes que $\tau_j^\alpha \mu_j^\beta$ esteja atualizado em cada item.
+
+Isto indica que o algoritmo irá se beneficiar do uso de \textbf{barreiras}, impedindo que cada thread continue sua execução antes que todas as threads terminem o estágio específico em que se encontram. Além disso, um lock será necessário para impedir que $\tau_i$ seja modificado por várias threads ao mesmo tempo. O algoritmo \ref{acopar} mostra como ele irá funcionar para uma Thread. Para o programa final, basta verificar qual thread produziu a melhor solução.
+
+\begin{algorithm}[ht]
+		\KwIn{\\
+			$barreira$: Estrura de barreira inicializada antes da criação das Threads\\
+			$T$: O numero total de threads\\
+			$threadid$: O identificador da thread, $0\leq threadid \leq T$\\
+			$iter$: Número de iterações do sistema\\
+			$ants$: Número de formigas do sistema\\
+			$n$: Número de itens\\
+			$m$: Número de restrições\\
+			$C_k, 0<k<m$: Capacidade da mochila\\
+			$v_j, 0<j<n$: Valor do item $j$\\
+			$r_{ij}, 0<j<n, 0<i<m$: Restrição $i$ do item $j$\\
+			$\mu_j = \dfrac{v_j}{
+				\prod r_{ij}}$: Atratividade do item $j$\\
+			$\varphi, \varphi_{\max}$: Valor inicial e máximo de feromônio\\
+			$\rho$: Coeficiente de evaporação do feromônio\\
+			$\alpha$: Peso que o feromônio tem sobre a seleção dos itens\\
+			$\beta$: Peso que a atratividade tem sobre a seleção dos itens\\
+		}
+		
+		\KwOut{$S$: estado da mochila na solução final}
+		
+		$ini_{ant} \gets threadid * \lceil\frac{ants}{T}\rceil$\;
+		$fin_{ant} \gets \min(ini_{ant} + \lceil\frac{ants}{T}\rceil, ants)$\;
+		$ini_{item} \gets threadid * \lceil\frac{n}{T}\rceil$\;
+		$fin_{item} \gets \min(ini_{item} + \lceil\frac{n}{T}\rceil, n)$\;
+		
+		$\forall_{0<j<n} \tau_j \gets \varphi$\;
+		\While{$iter{-}{-} > 0$ }{
+			$best_x\gets\emptyset \qquad \forall_{0<x<ants}$\;
+			\BlankLine
+			\texttt{buscar\_solucao($best_x, best$)(\ref{algbuscaSol})}\;
+			barreira\_esperar($barreira$)\;
+			\BlankLine
+			\texttt{evap\_feromonio()(\ref{algevapPher})}\;
+			barreira\_esperar($barreira$)\;
+			\BlankLine
+			\texttt{atualiza\_feromonio($best_x$)(\ref{algupdPher})}\;
+			barreira\_esperar($barreira$)\;
+			
+			\For{$j\gets ini_{item}$ \textbf{to} $ fin_{item}$}{
+				Atualizar $\tau_j^\alpha \mu_j^\beta$\;
+			}
+			barreira\_esperar($barreira$)\;
+		}
+		return $best$\;
+		\caption{Algoritmo de uma thread para o ACO}
+		\label{acopar}
+\end{algorithm}
+
+\begin{algorithm}[htb]
+	\For{$x\gets ini_{ant} $\textbf{ to }$ fin_{ant}$}{
+		$solucao\gets constroi\_solucao()$\;
+		\If{($solucao > best_x$)}{$best_x\gets solucao$}
+		\If{($solucao > best$)}{$best\gets solucao$}	
+	}
+	\caption{Busca de solução no algoritmo paralelo}
+	\label{algbuscaSol}
+\end{algorithm}
+\begin{algorithm}[htb]
+	\For{$j\gets ini_{item}$ \textbf{to} $ fin_{item}$}{
+		$\tau_j \gets \tau_j * \rho$\;
+	}
+	\caption{Evaporar Feromonios no algoritmo paralelo}
+	\label{algevapPher}
+\end{algorithm}
+\begin{algorithm}[htb]
+	\For{$x\gets ini_{ant}$ \textbf{to} $ fin_{ant}$}{
+		\ForEach{$i$: Item $\in best_x$}{
+			\texttt{lock($\tau_i$)}\;
+			$\tau_i \gets \Delta\tau(best_x)$\;	
+			\texttt{unlock($\tau_i$)}\;
+		}
+	}
+	\caption{Atualizar feromonios no algoritmo paralelo}
+	\label{algupdPher}
+\end{algorithm}
+
+\subsection{Seleção de Formigas}
+Dado um número qualquer de formigas, pode-se distribui-las entre as threads quase-igualmente(com uma exceção para a última thread, caso $ants\mod T \neq 0$) com duas operações:
+\begin{align}
+ini_{ant} \gets &threadid * \lceil\frac{ants}{T}\rceil\nonumber\\
+fin_{ant} \gets &\min(ini_{ant} + \lceil\frac{ants}{T}\rceil, ants)\nonumber
+\end{align}
+Assim, enquanto um programa que atinge todas as formigas irá iterar sobre as formigas $[0,ants)$, as threads irão iterar igualmente sobre $[ini_{ant}, fin_{ant})$. Além disso, as operações que ocorrem sobre os $n$ itens são analogamente distribuídas entre as threads, onde cada thread irá processar os itens $[ini_{item}, fin_{item})$
+
+\subsection{Análise de desempenho}
+O programa foi implementado na linguagem \texttt{C}, padrão \texttt{C11}, compilado com gcc versão 5.3.0 sob otimização \texttt{-O2}, e executado em um notebook \textbf{Dell Inspiron 14z 5423}, que possui um processador \textbf{i5 3317U 1.7GHz}. Este processador possui dois núcleos físicos e dois virtuais, totalizando quatro núcleos de processamento, com um cache de 128KB/512KB/3072KB para L1/L2/L3 respectivamente. A execução ocorreu no sistema operacional Elementary OS "freya", baseado no Ubuntu 14.04.
+
+Para a coleta de dados de desempenho, o programa foi executado utilizando 1, 2, 4 e 8 threads cada um executados 10 vezes, e mais 10 vezes com uma versão não paralela do programa(ou seja, sem a inclusão da biblioteca \texttt{pthreads} ou qualquer mecanismo de paralelismo). O tempo reportado foi coletado com um cronometro implementado dentro do programa, e não inclui o tempo de processamento não relevante à execução do algoritmo(por exemplo, leitura de dados de entrada). A tabela \ref{tab:tempos} mostra o resultado da coleta de dados.
+
+\begin{table} [ht]
+	\centering
+	\caption{Tempo de execução médio (10 execuções)}
+	\label{tab:tempos}
+	\begin{tabular}{|c|c|c|c|c|}
+		\hline
+		\textbf{Nº de } & {\bf Média } & 
+		{\bf Desvio Padrão} & {\bf Speedup}& \textbf{Speedup}\\
+		Threads & de tempo & ($\sigma$) & (vs sequencial) & (vs 1 thread)\\
+		\hline
+		Sequencial & 4'42"114 & 12"070 & 1 & --\\
+		\hline
+		1 & 6'3"115 & 1"853 & 0.777 & 1 \\
+		\hline
+		2 & 3'23"765 & 10"734 & 1.260 & 1.628 \\
+		\hline
+		4 & 3'16"29 & 7"888 & 1.439 & 1.852 \\
+		\hline
+		8 & 4'11"818 & 1"579 & 1.120 & 1.442\\
+		\hline
+	\end{tabular}
+\end{table}
+
+Nota-se que existe uma perda de desempenho relativo ao aumentar o número de Threads; Idealmente, a coluna de \textit{Speedup} deveria se aproximar ao número de threads. Entretanto, no caso de teste existem alguns problemas que causam uma perda de desempenho. Primeiramente, em uma arquitetura com apenas 4 núcleos de processamento, é natural que, ao passar desse número de threads, exista uma perda de processamento. Isto é visualizado com o fato de 8 threads serem mais lentas do que 4 threads.
+
+Além disso, existe uma grande perda de desempenho com o \textit{overhead} do paralelismo - isto é verificado com a diferença de tempo entre o programa Sequencial e de 1 Thread. Em particular, a existência de um lock para cada $\tau_j$ causa um overhead notável.
+
+Em seguida, nota-se uma perda de desempenho entre 2 e 4 threads. Enquanto um Speedup de 1.628 para 2 threads é \textit{aceitável}(porém possivelmente melhorável, se o código implementado), o speedup de apenas 1.852 para quatro threads é extremamente baixo - esta perda de desempenho é uma consequencia do \textit{overhead} em conjunto com o fato de que o computador utilizado possui dois núcleos \textit{virtuais}, que dividem memória com seus núcleos físicos - e com a divisão de memória, existe um número maior de erros de cache.
+
+\subsection{Possíveis otimizações}
+O programa foi escrito com suporte a um número dinâmico de itens e de restrições. Em \texttt{C}, isto significa que não é possível alinhar precisamente os dados dos itens com os dados de suas restrições: como estes não são definidos a tempo de compilação, é necessário alocá-los em tempo de execução o que implica que a memória das restrições $r_{ij}$ não ficará alinhada corretamente à estrutura do item $i$; Isto significa que todas as operações sobre um item que leva em consideração suas restrições causarão uma grande quantidade de misses de cache.
+
+Outra possível otimização seria considerar o feromônio como uma matriz individual a cada thread. Isto significaria que não seria necessário correr os problemas de corrida para atualizar o feromônio, e que cada thread agiria como uma colônia de formigas independente.
+
+A implementação do projeto está disponível em \url{https://github.com/Barbiero/KnapsackAntSystem}.

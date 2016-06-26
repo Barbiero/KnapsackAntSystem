@@ -1,0 +1,68 @@
+\section{Sistema de Colonização de Formigas}
+O Algoritmo de Colonização de Formigas, ou \textit{ACO}, é uma meta-heurística de otimização aplicada em diversas áreas e é útil quando um tempo curto é necessário para resolver um problema \cite{acomkp}.  É um sistema onde múltiplos agentes(formigas) agem de uma forma relativamente simples porém interagem entre si(através de um feromônio) resultando em um comportamento complexo.
+
+O ACO consiste em repetir diversas vezes um conjunto de operações:
+\begin{enumerate}
+	\item Buscar solução baseado no feromônio atual
+	\item Atualizar o Feromônio
+	\item (opcional) Operações de \textit{Daemon}
+\end{enumerate}
+
+Estas operações são repetidas várias vezes até que uma condição de parada seja satisfeita: um limite no número de iterações, tempo ou mesmo uma interrupção externa. Em geral, espera-se que o algoritmo encontre uma melhor solução se este ciclo for repetido mais vezes.
+
+\subsection{Construção da Solução}
+Como é comum para o ACO tratar o problema como um grafo, a construção da solução pode ser feita pelo Algoritmo \ref{buildSol}.
+
+\begin{algorithm}[hb]
+	$Solucao \gets \emptyset$\;
+
+	\While{true}{
+		$A \gets $ conjunto de arestas que levam a uma solução válida\;
+		\If{$A = \emptyset $}{
+			$return$ \textbf{Solucao}\;
+		}
+			
+		Solucao avança em uma aresta de A\;
+	}
+	\caption{Algoritmo de construcão de solução}
+	\label{buildSol}
+\end{algorithm}
+
+Embora o algoritmo pareça relativamente simples, o método de seleção da aresta que será avançada é o diferencial do \textit{ACO}. Neste sistema, atribuem-se a cada aresta dois valores chamados \textit{feromônio}($\tau$) e \textit{atratividade}($\mu$). Estes valores podem, ou não, ser relativos ao estado atual da solução no momento de sua construção, e relativos aos atributos das arestas; A seleção é feita então probabilisticamente: Dado um conjunto $A_i$ de possíveis arestas para construir a solução em um passo $i$, a chance de selecionar uma aresta $j$ é dada por
+\[ 
+	p_j = 
+	\begin{cases}
+	\dfrac{\tau_j^\alpha \mu_j^\beta}
+	{\sum_{k \in A_i} \tau_k^\alpha \mu_k^\beta},
+	 & \text{se } j \in A_i,\\
+	 0 & \text{se } j \notin A_i.
+	\end{cases}
+\]
+O valor de $\mu_j$ é dado por uma combinação de fatores do problema; no problema da mochila, por exemplo, pode se referir a uma relação entre os atributos de um item e a capacidade total da mochila. Este valor deve ser determinado como uma heurística para ajudar a selecionar as melhores arestas para a solução. As constantes $\alpha$ e $\beta$ determinam o peso que o feromônio $\tau$ e a atratividade $\mu$ terão, respectivamente.
+
+\subsection{Atualização do Feromônio}
+Em cada iteração do sistema, o feromônio será atualizado de acordo com a melhor solução encontrada por uma formiga nesta iteração, assim aumentando a probabilidade de seguir um caminho de uma boa solução para a próxima iteração. Além de existir a soma do feromônio, ele também irá \textit{evaporar}, isto é, o valor numérico do feromônio será multiplicado por uma constante $0<\rho<1$. Assim, a atualização do feromônio é dada pelo algoritmo \ref{pherUpdate}.
+
+\begin{algorithm}[ht]
+	\KwIn{$S_k$: Conjunto de soluções encontradas por todas as formigas\\
+		$\rho$: Taxa de evaporação do feromônio, $0\leq\rho\leq1$}
+	
+	\ForEach{$j :$ aresta no sistema}{
+		$\tau_j \gets \tau_j * \rho$\;
+	}
+	
+	\ForEach{$S\in S_k$}{
+		\ForEach{$i$: Aresta $\in S$}{
+			$\tau_i \gets \tau_i * \Delta\tau(S)$\;
+		}	
+	}
+	\caption{Atualização de Ferômonio}
+	\label{pherUpdate}
+\end{algorithm}
+
+Note que $\Delta\tau$ é um valor que pode, ou não, depender de atributos da solução S, mas é comum que este valor seja relativo à qualidade da solução encontrada - assim, soluções melhores colocam mais feromônio no sistema.
+
+\subsection{Operações de Daemon}
+São operações dependentes da implementação. Por exemplo, o cálculo de $\tau_j^\alpha \mu_j^\beta$ é computacionalmente custoso, e pode ser útil atualizá-lo em cada aresta apenas uma vez por iteração ao invés de calculá-lo em todas as chamadas, assim otimizando a velocidade de execução do programa.
+
+

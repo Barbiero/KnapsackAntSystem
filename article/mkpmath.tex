@@ -1,0 +1,33 @@
+\section{Problema da Mochila de Múltiplas Restrições}
+
+\subsection{O Problema da Mochila}
+O Problema da Mochila tradicional é um problema de otimização combinatória, normalmente descrito como  \textbf{"Dado um conjunto de possíveis itens, cada um com um certo valor e um certo peso, e uma mochila com uma capacidade de peso limite, qual é a melhor combinação de itens que a mochila consegue suportar, tal que o valor seja maximizado?"}.
+
+Matematicamente, o problema é descrito como:
+	\begin{displaymath}
+	\max \sum_{i=1}^{n} v_i x_i
+	\end{displaymath}
+	\begin{displaymath}
+	tal\ que \sum_{i=1}^{n} w_i x_i \leq W
+	\end{displaymath}
+	Onde 
+	\begin{itemize}
+		\item $n$ é a quantidade de itens que podem ser postos na mochila,
+		\item $v_i$ é o valor do item $i$,
+		\item  $w_i$ é o peso do item $i$, 
+		\item $W$ é a capacidade da mochila e
+		\item $x_i$ é a quantidade de vezes em que o item $i$ é colocado na mochila.
+	\end{itemize}
+	
+Em particular, a variação mais comum do problema a ser encontrado é a \textit{Mochila Binária}, onde $x_i \in \{0,1\}$, ou seja, existe apenas um item de cada tipo que pode ser posto na mochila, e este item não pode ser fracionado.
+
+\subsection{Mochila Binária com Múltiplas Restrições}
+Outra variação do problema da mochila binária determina que a mochila possui mais do que uma restrição - por exemplo, além da capacidade de peso existe um limite de volume. O problema é então descrito na forma
+\begin{eqnarray}
+\max & \sum_{i=1}^{m} \sum_{j=1}^{n} p_{ij} x_{ij} & \nonumber\\
+tal\ que & \sum_{j=1}^{n} w_j x_{ij} \leq W_i, & \forall\ 1 \leq i \leq m,\nonumber\\
+		& \sum_{i=1}^{m} x_{ij} \leq 1, & \forall\ 1 \leq j \leq n, \nonumber\\
+		& x_{ij} \in \{0,1\}, & (\forall\ 1 \leq j \leq n )\wedge (\forall\ 1 \leq i \leq m) \nonumber
+\end{eqnarray}
+
+

@@ -1,0 +1,51 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[brazilian,english]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[hidelinks]{hyperref}
+\usepackage[ruled,vlined,algosection]{algorithm2e}
+\AtBeginDocument{\let\textlabel\label}
+
+
+\begin{document}
+
+\selectlanguage{brazilian}
+\title{Paralelização do Algoritmo de Colonização de Formigas com o Problema da Mochila de Múltiplas Restrições}
+
+\author{Pedro Barbiero\\
+	Universidade Estadual de Maringá\\
+	{\tt pedrobarbiero@gmail.com}
+}
+
+\maketitle
+
+\selectlanguage{english}
+\begin{abstract}
+	This report describes the process of parallelizing the Ant Colonization Optimization algorithm used to solve the Multiple-Constraint Knapsack problem. The process included separating the ant-structures into different threads, and it was noted that the speedup of the application was affected not only by the number of threads, but also by the memory organization and modelling of the problem. 
+	It was also noted that there was a smaller variance in execution time the more threads were used, but that increasing the number of threads does not necessarily mean in a smaller execution time. This report does not go into detail of methods of solving the Knapsack problem nor does it go into detail of different Ant Systems, and uses a very simplified algorithm.
+	
+\end{abstract}
+
+\selectlanguage{brazilian}
+
+\input{introduction}
+
+\input{mkpmath}
+
+\input{antsystem}
+
+\input{parellelprog}
+
+\input{antmks}
+
+\input{conclusoes}
+
+\bibliographystyle{ieeetr}
+\bibliography{ref}
+
+\end{document}
+
+
+

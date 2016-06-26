@@ -1,0 +1,16 @@
+This is BibTeX, Version 0.99dThe top-level auxiliary file: main.aux
+The style file: acm.bst
+Database file #1: ref.bib
+I was expecting a `,' or a `}'---line 29 of file ref.bib
+ :  
+ :  date = {2016-06-25},
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+Warning--empty publisher in antsystem
+Warning--empty year in antsystem
+Warning--empty publisher in acomkp
+Warning--empty year in acomkp
+Warning--empty chapter and pages in acomkp
+Warning--empty publisher in complexity
+Warning--empty year in complexity
+(There was 1 error message)
