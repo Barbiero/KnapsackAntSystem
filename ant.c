@@ -10,7 +10,6 @@
 #include "ant.h"
 #include "item.h"
 
-
 void ant_init(struct Ant* ant)
 {
     Knapsack_init(&ant->solution);
@@ -56,7 +55,7 @@ inline Pher ant_getPherDelta(struct Ant* ant)
  * This function is THREAD UNSAFE, and delta shall not
  * be shared accross multiple threads.
  */
-void ant_getDeltaPherMatrix(struct Ant *ant, Pher *delta[])
+void ant_getDeltaPherMatrix(struct Ant *ant, Pher *(delta[]))
 {
     Pher deltaPher = ant_getPherDelta(ant);
 
@@ -71,9 +70,8 @@ void ant_getDeltaPherMatrix(struct Ant *ant, Pher *delta[])
 
 /**
  * Updates item pheromones with a matrix
- * THREAD SAFE: mutexes are in place to make sure no racing occurs
  */
-void ant_updPheromonesMatrix(Pher *delta[])
+void ant_updPheromonesMatrix(Pher *(delta[]))
 {
     for(ItemId i = 0; i < NUM_ITEMS; i++)
     {
@@ -98,9 +96,7 @@ void ant_updatePheromones(struct Ant* ant)
     {
         if(ant->solution.has_item[i])
         {
-            //Critical region!
             Item_addPheromone(&universe[i], delta);
-            //!Critical region
         }
     }
 }

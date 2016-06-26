@@ -14,7 +14,7 @@ struct Knapsack {
     /*
      * marks the remaining capacity the sack has
      */
-    Restr capacity[NUM_RESTRICTIONS];
+    Restr *capacity;
 
     /*
      * worth of the knapsack, aka. the sum of all items worth

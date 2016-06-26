@@ -1,15 +1,10 @@
 Selected Values:
 	Threads: 8
-	Worth: [1, 100]
-	Restrictions: { [0.50, 1000.00],[10.00, 50000.00], }
-	Pheromone: initial: 40.00 max: 100.00
+	Pheromone: initial: 50.00 max: 1000.00
 	Evap coef: 0.05
 	Alpha: 0.10 Beta: 1.50
-	Knapsack Capacities:
-		{ 10000.00,200000.00, }
-	Number of items: 10000
-	Iterations: 600
-	Ants: 100
+	Iterations: 1200
+	Ants: 240
 
 Ant system starting
 	Thread 0 criada com sucesso
@@ -20,13 +15,13 @@ Ant system starting
 	Thread 5 criada com sucesso
 	Thread 6 criada com sucesso
 	Thread 7 criada com sucesso
-	Thread 0 unida com sucesso. localBest: 4265
-	Thread 1 unida com sucesso. localBest: 4031
-	Thread 2 unida com sucesso. localBest: 4149
-	Thread 3 unida com sucesso. localBest: 4105
-	Thread 4 unida com sucesso. localBest: 4296
-	Thread 5 unida com sucesso. localBest: 4128
-	Thread 6 unida com sucesso. localBest: 4105
-	Thread 7 unida com sucesso. localBest: 4120
-Ant system finished in 3m 3s 378ms
-Best result found: 4296
+	Thread 0 unida com sucesso. localBest: 3005
+	Thread 1 unida com sucesso. localBest: 2869
+	Thread 2 unida com sucesso. localBest: 2838
+	Thread 3 unida com sucesso. localBest: 2959
+	Thread 4 unida com sucesso. localBest: 3125
+	Thread 5 unida com sucesso. localBest: 3075
+	Thread 6 unida com sucesso. localBest: 2792
+	Thread 7 unida com sucesso. localBest: 2842
+Ant system finished in 4m 10s 430ms
+Best result found: 3125

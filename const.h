@@ -40,16 +40,16 @@ typedef float64 PherDes;
 //Number of items in the universe
 extern ItemId NUM_ITEMS;
 //Number of Restrictions for each item
-#define NUM_RESTRICTIONS 2
+extern RestrId NUM_RESTRICTIONS;
 
 //Min-Max value for each item
 extern Cost MIN_VALUE;
 extern Cost MAX_VALUE;
 
 //Minimum values for restrictions
-extern Restr MIN_REST[];
+extern Restr *MIN_REST;
 //Maximum values for restrictions
-extern Restr MAX_REST[];
+extern Restr *MAX_REST;
 
 //How much pheromone items begin with
 extern Pher PHE_INIT; 
@@ -69,10 +69,10 @@ extern float64 DES_WEIGHT;
 
 //Default knapsack struct
 extern struct Knapsack k_init;
+extern Restr *cap_init;
 
-#ifdef THREADED
-extern pthread_mutex_t itemMut;
-#endif
+extern struct Item *universe;
+
 
 #endif
 

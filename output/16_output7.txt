@@ -1,15 +1,10 @@
 Selected Values:
 	Threads: 16
-	Worth: [1, 100]
-	Restrictions: { [0.50, 1000.00],[10.00, 50000.00], }
-	Pheromone: initial: 40.00 max: 100.00
+	Pheromone: initial: 50.00 max: 1000.00
 	Evap coef: 0.05
 	Alpha: 0.10 Beta: 1.50
-	Knapsack Capacities:
-		{ 10000.00,200000.00, }
-	Number of items: 10000
-	Iterations: 600
-	Ants: 100
+	Iterations: 1200
+	Ants: 240
 
 Ant system starting
 	Thread 0 criada com sucesso
@@ -28,21 +23,21 @@ Ant system starting
 	Thread 13 criada com sucesso
 	Thread 14 criada com sucesso
 	Thread 15 criada com sucesso
-	Thread 0 unida com sucesso. localBest: 4071
-	Thread 1 unida com sucesso. localBest: 4080
-	Thread 2 unida com sucesso. localBest: 4224
-	Thread 3 unida com sucesso. localBest: 4096
-	Thread 4 unida com sucesso. localBest: 4143
-	Thread 5 unida com sucesso. localBest: 4136
-	Thread 6 unida com sucesso. localBest: 4149
-	Thread 7 unida com sucesso. localBest: 4068
-	Thread 8 unida com sucesso. localBest: 4168
-	Thread 9 unida com sucesso. localBest: 4101
-	Thread 10 unida com sucesso. localBest: 4055
-	Thread 11 unida com sucesso. localBest: 4086
-	Thread 12 unida com sucesso. localBest: 4282
-	Thread 13 unida com sucesso. localBest: 4243
-	Thread 14 unida com sucesso. localBest: 4108
-	Thread 15 unida com sucesso. localBest: 0
-Ant system finished in 4m 38s 296ms
-Best result found: 4282
+	Thread 0 unida com sucesso. localBest: 2858
+	Thread 1 unida com sucesso. localBest: 2726
+	Thread 2 unida com sucesso. localBest: 3008
+	Thread 3 unida com sucesso. localBest: 2987
+	Thread 4 unida com sucesso. localBest: 2904
+	Thread 5 unida com sucesso. localBest: 2854
+	Thread 6 unida com sucesso. localBest: 3036
+	Thread 7 unida com sucesso. localBest: 2775
+	Thread 8 unida com sucesso. localBest: 2879
+	Thread 9 unida com sucesso. localBest: 2889
+	Thread 10 unida com sucesso. localBest: 2771
+	Thread 11 unida com sucesso. localBest: 2884
+	Thread 12 unida com sucesso. localBest: 2791
+	Thread 13 unida com sucesso. localBest: 2901
+	Thread 14 unida com sucesso. localBest: 3031
+	Thread 15 unida com sucesso. localBest: 2935
+Ant system finished in 6m 57s 117ms
+Best result found: 3036

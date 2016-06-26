@@ -8,51 +8,45 @@
 #include <math.h>
 #include <tgmath.h>
 
-#ifdef THREADED
-#include <pthread.h>
-#endif
-
 #include "assert.h"
 #include "const.h"
 #include "item.h"
 #include "util.h"
-
-
-Cost MIN_VALUE = 1;
-Cost MAX_VALUE = 100;
-
-Restr MIN_REST[] = {0.5, 100.0};
-Restr MAX_REST[] = {100.0, 2000.0};
-
-Pher PHE_INIT = 40.0;
-Pher PHE_MAX = 100.0;
-
-float64 PHE_EVAP = 0.05;
-
-float64 PHE_WEIGHT = 0.1;
-float64 DES_WEIGHT = 1.5;
-
-ItemId NUM_ITEMS = 300;
-struct Item *universe = NULL;
 
 void Item_init(struct Item* item)
 {
     //An item initializes with all values as 0
     (*item) = (struct Item){0};
 
+    //restrictions is an array and should be 0-initialized
+    item->restrictions = calloc(sizeof(*item->restrictions), NUM_RESTRICTIONS);
+
     //Except for its pheromone
     item->pheromone = PHE_INIT;
+
+#ifdef THREADED
+    pthread_mutex_init(&item->itemLock, NULL);
+#endif
+}
+
+void Item_fin(struct Item* item)
+{
+    free(item->restrictions);
+
+#ifdef THREADED
+    pthread_mutex_destroy(&item->itemLock);
+#endif
 }
 /**
  * Returns the desirability based on value and the restrictions
  * value / prod(restriction/restricition_range)
  */
-Desirability get_desirability(Cost value, Restr rest[NUM_RESTRICTIONS])
+Desirability get_desirability(Cost value, Restr *rest)
 {
     Desirability d = (Desirability)value;
     for(RestrId i = 0; i < NUM_RESTRICTIONS; i++)
     {
-        d = d / (rest[i] / (MAX_REST[i]-MIN_REST[i]) );
+        d = d / (rest[i] / cap_init[i]);
     }
 
     return d;
@@ -85,27 +79,21 @@ void Item_rand(struct Item* i)
     Item_updatePdValue(i);
 }
 
-#ifdef THREADED
-pthread_mutex_t itemMut;
-#endif
+
+inline Pher phMin(Pher a, Pher b){
+    return (a > b? b : a);
+}
 
 void Item_addPheromone(struct Item *i, Pher delta)
 {
 #ifdef THREADED
-    pthread_mutex_lock(&itemMut);
+    pthread_mutex_lock(&i->itemLock);
 #endif
-    i->pheromone = (Pher)fmin(i->pheromone + delta, PHE_MAX);
+    i->pheromone = phMin(i->pheromone + delta, PHE_MAX);
 #ifdef THREADED
-    pthread_mutex_unlock(&itemMut);
+    pthread_mutex_unlock(&i->itemLock);
 #endif
 }
-
-
-inline void Item_evapPheromone(struct Item *i)
-{
-    i->pheromone *= (1 - PHE_EVAP);
-}
-
 
 
 void evapPheromones()
@@ -145,5 +133,14 @@ void create_universe()
     }
 
     qsort(universe, NUM_ITEMS, sizeof(struct Item), desire_order);
+}
+
+void delete_universe()
+{
+    for(ItemId i = 0; i < NUM_ITEMS; i++)
+    {
+        Item_fin(&universe[i]);
+    }
+    free(universe);
 }
 

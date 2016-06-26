@@ -1,5 +1,4 @@
 Selected Values:
-	Threads: 1
 	Pheromone: initial: 50.00 max: 1000.00
 	Evap coef: 0.05
 	Alpha: 0.10 Beta: 1.50
@@ -7,7 +6,5 @@ Selected Values:
 	Ants: 240
 
 Ant system starting
-	Thread 0 criada com sucesso
-	Thread 0 unida com sucesso. localBest: 3024
-Ant system finished in 6m 2s 109ms
-Best result found: 3024
+Ant system finished in 4m 44s 110ms
+Best result found: 2938

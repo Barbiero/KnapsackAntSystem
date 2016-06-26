@@ -10,32 +10,33 @@
 #include "item.h"
 #include "util.h"
 
-//default values for a knapsack
-struct Knapsack k_init = {
-    .has_item = NULL, 
-    .capacity = {3000.0, 10000.0},
-    .worth = (Cost) 0,
-    .num_items = (size_t)0
-};
+inline void Knapsack_initCapacity(Restr *cap)
+{
+    for(RestrId i = 0; i < NUM_RESTRICTIONS; i++)
+    {
+        cap[i] = cap_init[i];
+    }
+}
 
 /**
  * Sets the memory of k to that of a default knapsack
  */
 void Knapsack_init(struct Knapsack *k)
 {
-    assert(k != NULL);
     memcpy(k, &k_init, sizeof(*k));
 
-    k->has_item = calloc(sizeof(bool), NUM_ITEMS);
+    k->capacity = malloc(sizeof(*k->capacity) * NUM_RESTRICTIONS);
+    Knapsack_initCapacity(k->capacity);
+    k->has_item = calloc(sizeof(*k->has_item), NUM_ITEMS);
 }
 
 void Knapsack_destroy(struct Knapsack *k)
 {
-    assert(k != NULL);
     free(k->has_item);
+    free(k->capacity);
 }
 
-bool Knapsack_canAddItem(struct Knapsack *k, ItemId i)
+inline bool Knapsack_canAddItem(struct Knapsack *k, ItemId i)
 {
     if(k->has_item[i]) return false;
 
@@ -126,7 +127,7 @@ void deleteNeighbour(struct Neighbour *n)
 }
 
 
-int32_t Neighbour_search(struct Neighbour *n, double search_val)
+inline int32_t Neighbour_search(struct Neighbour *n, double search_val)
 {
     /* Sequential Search */
     
