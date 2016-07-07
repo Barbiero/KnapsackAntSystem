@@ -9,6 +9,15 @@
 struct Item
 {
 
+#ifdef THREADED
+    /** the lock of a given item
+     * for pheromone updating
+     */
+
+    pthread_mutex_t itemLock;
+#endif
+
+
     /**
      * Each type of restriction, independent of each other
      * A Knapsack cannot go over any restriction
@@ -31,15 +40,6 @@ struct Item
      * The value of the item
      */
     Cost value;
-
-#ifdef THREADED
-    /** the lock of a given item
-     * for pheromone updating
-     */
-
-    pthread_mutex_t itemLock;
-#endif
-
 };
 
 extern struct Item *universe;

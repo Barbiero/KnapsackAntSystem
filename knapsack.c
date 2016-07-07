@@ -12,10 +12,7 @@
 
 inline void Knapsack_initCapacity(Restr *cap)
 {
-    for(RestrId i = 0; i < NUM_RESTRICTIONS; i++)
-    {
-        cap[i] = cap_init[i];
-    }
+    memcpy(cap, cap_init, sizeof(*cap) * NUM_RESTRICTIONS);
 }
 
 /**
@@ -70,15 +67,11 @@ struct Neighbour *createNeighbour(struct Knapsack *k)
 {
     //iterate over all items and add to the neighbourhood
     //only the items that can be added to the knapsack k
-    //allocate only as much space as necessary, multiplying by 2 each time
-
 
     struct Neighbour *n = malloc(sizeof(*n));
 
-    //n->items = malloc(sizeof(*(n->items)));
     n->items = malloc(sizeof(*n->items)*NUM_ITEMS);
     n->size = 0;
-    //n->cap = 1; //neighbour array capacity
     n->cap = NUM_ITEMS;
 
     size_t j = 0; //neighbour iterator
@@ -90,14 +83,6 @@ struct Neighbour *createNeighbour(struct Knapsack *k)
         if(!Knapsack_canAddItem(k, i)){
             continue;
         }
-
-        /*
-        if(j >= n->cap)
-        {
-            n->cap *= 2;
-            n->items = realloc(n->items, sizeof(*(n->items)) * n->cap);
-        }
-        */
 
         n->items[j] = (struct K_item_prob){
             .itemid = i,
@@ -147,7 +132,7 @@ inline int32_t Neighbour_search(struct Neighbour *n, double search_val)
 //and return its ID
 ItemId Neighbour_randSelect(struct Neighbour *n)
 {
-    double r = rand_double(0.0, 1.0);
+    float64 r = rand_double(0.0, 1.0);
     int32_t nid = Neighbour_search(n, r);
 
     return n->items[nid].itemid;

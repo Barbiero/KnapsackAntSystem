@@ -17,14 +17,16 @@ struct Knapsack {
     Restr *capacity;
 
     /*
-     * worth of the knapsack, aka. the sum of all items worth
-     */
-    Cost worth;
-
-    /*
      * number of items in the knapsack
      */
     size_t num_items;
+
+    /*
+     * worth of the knapsack, aka. the sum of all items worth
+     */
+    _Alignas(8) Cost worth;
+
+
 };
 
 struct K_item_prob{
@@ -41,6 +43,8 @@ struct Neighbour {
     //cap is the allocated size, different from the used size above
     size_t cap;
     struct K_item_prob* items;
+
+    _Alignas(8) char __padding;
 };
 
 
