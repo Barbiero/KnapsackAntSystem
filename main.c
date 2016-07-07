@@ -14,7 +14,6 @@
 
 #ifdef THREADED
 #include <pthread.h>
-#include "barrier.h"
 
 static int num_threads = 4;
 #endif
@@ -322,7 +321,7 @@ void process_cli(int argc, char **argv)
 struct Ant (*ants);
 
 #ifdef THREADED
-Barrier barrier;
+static pthread_barrier_t barrier;
 
 struct t_args {
     int32_t threadid;
@@ -354,17 +353,21 @@ thread_processAnts(void *args)
 
     while(localit--) {
 
-        barrier_wait(&barrier, tid);
+        pthread_barrier_wait(&barrier);
 
+        Pher *pheMatrix = calloc(sizeof(*pheMatrix), NUM_ITEMS);
         for(i = ini; i < fin; i++)
         {
             ant_init(&ants[i]);
             ant_buildSolution(&ants[i]);
             if(ants[i].solution.worth > *localBest)
                 *localBest = ants[i].solution.worth;
+
+            ant_getDeltaPherMatrix(&ants[i], &pheMatrix);
+            ant_fin(&ants[i]);
         }
 
-        barrier_wait(&barrier, tid);
+        pthread_barrier_wait(&barrier);
        /*
         if(tid == 0) {
             evapPheromones();
@@ -378,18 +381,18 @@ thread_processAnts(void *args)
         }
         
 
-        barrier_wait(&barrier, tid);
-        Pher *pheMatrix = calloc(sizeof(*pheMatrix), NUM_ITEMS);;
-        for(i = ini; i < fin; i++)
+        pthread_barrier_wait(&barrier);
+
+/*        for(i = ini; i < fin; i++)
         {
             ant_getDeltaPherMatrix(&ants[i], &pheMatrix);
             ant_fin(&ants[i]);
         }
-
+*/
         ant_updPheromonesMatrix(&pheMatrix);
         free(pheMatrix);
 
-        barrier_wait(&barrier, tid);
+        pthread_barrier_wait(&barrier);
 
         /*
         if(tid == 0) {
@@ -566,10 +569,10 @@ int main(int argc, char **argv)
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
 
-    barrier_init(&barrier, num_threads);
-    if(errno != 0){
-        perror("");
-        exit(errno);
+    int s = pthread_barrier_init(&barrier, NULL, num_threads);
+    if(s != 0){
+        perror("pthread_barrier_init");
+        exit(s);
     }
 
     pthread_t threads[num_threads];
@@ -592,31 +595,6 @@ int main(int argc, char **argv)
 
     readmknap(fd);
     fclose(fd);
-
-
-/*
-    FILE *f = fopen("universe.txt", "w");
-
-    fprintf(f, "universe[] = { \n");
-    for(ItemId i = 0; i < NUM_ITEMS; i++)
-    {
-        fprintf(f, "{.value = %" PRIi32 ",", universe[i].value);
-        fprintf(f, ".restrictions = {");
-        for(RestrId j = 0; j < NUM_RESTRICTIONS; j++)
-        {
-            fprintf(f, "%lf", universe[i].restrictions[j]);
-            if(j < NUM_RESTRICTIONS-1) fprintf(f, ",");
-        }
-
-        fprintf(f, "},");
-        fprintf(f, ".desirability = %lf,", universe[i].desirability);
-        fprintf(f, ".pheromone = %lf,", universe[i].pheromone);
-        fprintf(f, ".pdValue = %lf}", universe[i].pdValue);
-        if(i < NUM_ITEMS-1) fprintf(f, ",\n");
-    }
-    fprintf(f, "\n}\n");
-    fclose(f);
-*/
 
     struct timeval start, stop;
     gettimeofday(&start, NULL);
@@ -642,7 +620,6 @@ int main(int argc, char **argv)
             if(ants[x].solution.worth > best)
                 best = ants[x].solution.worth;
         }
-        
 
         evapPheromones();
 
@@ -658,40 +635,24 @@ int main(int argc, char **argv)
         }
     }
 #else
-    int ret;
     struct t_args args[num_threads];
     for(int32_t i = 0; i < num_threads; i++) {
         args[i] = (struct t_args){i};
-        ret = pthread_create(&threads[i], &attr, thread_processAnts, &args[i]);
-        switch(ret) {
-            case EAGAIN:
-            case EINVAL:
-            case EPERM:
-                perror("");
-                break;
-            case 0:
-                printf("\tThread %i criada com sucesso\n", i);
-                break;
-            default:
-                break;
+        if(pthread_create(&threads[i], &attr, thread_processAnts, &args[i]) 
+                == 0) {
+            printf("\tThread %i created succesfully\n", i);
+        } else {
+            perror("");
         }
     }
 
     for(int32_t i = 0; i < num_threads; i++) {
         Cost *localBest;
-        ret = pthread_join(threads[i], (void**)(&localBest));
-        switch(ret) {
-            case EINVAL:
-            case ESRCH:
-            case EDEADLK:
-                perror("");
-                break;
-            case 0:
-                printf("\tThread %i unida com sucesso. localBest: %" PRIi32 "\n",
-                        i, *localBest);
-                break;
-            default:
-                break;
+        if(pthread_join(threads[i], (void**)(&localBest)) == 0) {
+            printf("\tThread %i joined succesfully. localBest: %" PRIi32 "\n",
+                    i, *localBest);
+        } else {
+            perror("");
         }
 
         if(*localBest > best)
@@ -721,7 +682,7 @@ int main(int argc, char **argv)
     delete_universe();
 
 #ifdef THREADED
-    barrier_destroy(&barrier);
+    pthread_barrier_destroy(&barrier);
 #endif
 
 }

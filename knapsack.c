@@ -40,11 +40,11 @@ inline bool Knapsack_canAddItem(struct Knapsack *k, ItemId i)
 {
     if(k->has_item[i]) return false;
 
-    //struct Item *item = &universe[i];
+    Restr *restrictions = universe[i].restrictions;
     
     for(RestrId c = 0; c < NUM_RESTRICTIONS; c++)
     {
-        if(k->capacity[c] < universe[i].restrictions[c]){
+        if(k->capacity[c] < restrictions[c]){
             return false;
         }
     }

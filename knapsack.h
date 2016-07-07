@@ -28,13 +28,10 @@ struct Knapsack {
 };
 
 struct K_item_prob{
-    ItemId itemid;
-
     //probability to choose this item
     Prob prob;
 
-    //padding to complete 16 bytes
-    int32_t __padding;
+    _Alignas(8) ItemId itemid;
 };
 
 struct Neighbour {
