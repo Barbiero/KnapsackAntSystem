@@ -10,7 +10,7 @@
 #include "item.h"
 #include "util.h"
 
-inline void Knapsack_initCapacity(Restr *cap)
+static void Knapsack_initCapacity(Restr *cap)
 {
     memcpy(cap, cap_init, sizeof(*cap) * NUM_RESTRICTIONS);
 }
@@ -33,13 +33,14 @@ void Knapsack_destroy(struct Knapsack *k)
     free(k->capacity);
 }
 
-inline bool Knapsack_canAddItem(struct Knapsack *k, ItemId i)
+static inline bool Knapsack_canAddItem(struct Knapsack *k, ItemId i)
 {
     if(k->has_item[i]) return false;
 
     Restr *restrictions = universe[i].restrictions;
     
-    for(RestrId c = 0; c < NUM_RESTRICTIONS; c++)
+//    for(RestrId c = 0; c < NUM_RESTRICTIONS; c++)
+    for(RestrId c = NUM_RESTRICTIONS-1; c >= 0; --c)
     {
         if(k->capacity[c] < restrictions[c]){
             return false;
@@ -63,16 +64,13 @@ void Knapsack_addItem(struct Knapsack *k, ItemId itemid)
     k->num_items++;
 }
 
-struct Neighbour *createNeighbour(struct Knapsack *k)
+void createNeighbour(struct Knapsack *k, struct Neighbour *n)
 {
     //iterate over all items and add to the neighbourhood
     //only the items that can be added to the knapsack k
 
-    struct Neighbour *n = malloc(sizeof(*n));
-
-    n->items = malloc(sizeof(*n->items)*NUM_ITEMS);
+    assert(n->items != NULL);
     n->size = 0;
-    n->cap = NUM_ITEMS;
 
     size_t j = 0; //neighbour iterator
 
@@ -102,17 +100,10 @@ struct Neighbour *createNeighbour(struct Knapsack *k)
         n->items[i].prob = (Prob)(n->items[i].prob/sum);
     }
 
-    return n;
-}
-
-void deleteNeighbour(struct Neighbour *n)
-{
-    free(n->items);
-    free(n);
 }
 
 
-inline int32_t Neighbour_search(struct Neighbour *n, double search_val)
+static int32_t Neighbour_search(struct Neighbour *n, double search_val)
 {
     /* Sequential Search */
     

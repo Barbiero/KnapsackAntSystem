@@ -17,30 +17,31 @@ void ant_init(struct Ant* ant)
 
 void ant_fin(struct Ant *ant)
 {
-    //destructor
     Knapsack_destroy(&ant->solution);
 }
 
-
 void ant_buildSolution(struct Ant* ant)
 {
-
+    struct Neighbour n;
+    n.items = malloc(sizeof(*n.items) * NUM_ITEMS);
     while(true)
     {
-        struct Neighbour *n = createNeighbour(&ant->solution);
-        if(n->size == 0){
-            deleteNeighbour(n);
+        createNeighbour(&ant->solution, &n);
+        if(n.size == 0){
             break;
         }
 
-        ItemId itemid = Neighbour_randSelect(n);        
+        ItemId itemid = Neighbour_randSelect(&n);        
 
         Knapsack_addItem(&ant->solution, itemid);
-        deleteNeighbour(n);
+    }
+
+    if(n.items != NULL) {
+        free(n.items);
     }
 }
 
-inline Pher ant_getPherDelta(struct Ant* ant)
+static inline Pher ant_getPherDelta(struct Ant* ant)
 {
     return (Pher)(ant->solution.worth * 0.025);
 }

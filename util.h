@@ -10,7 +10,7 @@
  * code by theJPester at
  * http://stackoverflow.com/questions/2509679/how-to-generate-a-random-number-from-within-a-range
  */
-inline int32_t
+static inline int32_t
 rand_int(int32_t min, int32_t max)
 {
     int32_t r;
@@ -34,7 +34,7 @@ rand_int(int32_t min, int32_t max)
  * Return a random double between a and b
  * Straight from the C FAQ http://c-faq.com/lib/fprand.html
  */
-inline float64
+static inline float64
 rand_double(float64 min, float64 max)
 {
     return min + (rand() / (RAND_MAX /(max-min)));

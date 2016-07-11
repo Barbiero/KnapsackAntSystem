@@ -32,7 +32,7 @@ struct Item
     Desirability desirability;
  
     /**
-     * Declaring the pheromone as _Atomic guarantees no race writes will occur
+     * Pheromone variable, how visited was this item 
      */
     Pher pheromone;
 
@@ -50,10 +50,7 @@ void Item_updatePdValue(struct Item*);
 Desirability get_desirability(Cost, Restr*);
 void Item_addPheromone(struct Item*, Pher);
 
-inline void Item_evapPheromone(struct Item *i)
-{
-    i->pheromone *= (1 - PHE_EVAP);
-}
+void Item_evapPheromone(struct Item *i);
 
 void evapPheromones();
 

@@ -1,6 +1,6 @@
 IDIR=.
 CC=mpicc
-CFLAGS=-I$(IDIR)  -Wall -Wextra -pedantic -O2 -DTHREADED -pg 
+CFLAGS=-I$(IDIR) -Wall -Wextra -pedantic -DTHREADED -pg -O2
 
  
 ODIR=./obj

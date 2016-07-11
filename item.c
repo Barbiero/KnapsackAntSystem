@@ -80,7 +80,7 @@ void Item_rand(struct Item* i)
 }
 
 
-inline Pher phMin(Pher a, Pher b){
+static Pher phMin(Pher a, Pher b){
     return (a > b? b : a);
 }
 
@@ -94,6 +94,12 @@ void Item_addPheromone(struct Item *i, Pher delta)
     pthread_mutex_unlock(&i->itemLock);
 #endif
 }
+
+void Item_evapPheromone(struct Item *i)
+{
+    i->pheromone *= (1 - PHE_EVAP);
+}
+
 
 
 void evapPheromones()

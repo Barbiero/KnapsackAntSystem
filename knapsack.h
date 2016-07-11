@@ -39,12 +39,7 @@ struct K_item_prob{
 struct Neighbour {
     size_t size; //number of items in the neighbourhood
 
-    //dynamic structure of all items
-    //cap is the allocated size, different from the used size above
-    size_t cap;
     struct K_item_prob* items;
-
-    _Alignas(8) char __padding;
 };
 
 
@@ -52,11 +47,9 @@ struct Neighbour {
 void Knapsack_init(struct Knapsack*);
 void Knapsack_destroy(struct Knapsack*);
 
-bool Knapsack_canAddItem(struct Knapsack*, ItemId);
 void Knapsack_addItem(struct Knapsack*, ItemId);
 
-struct Neighbour *createNeighbour(struct Knapsack*);
-void deleteNeighbour(struct Neighbour*);
+void createNeighbour(struct Knapsack*, struct Neighbour*);
 
 ItemId Neighbour_randSelect(struct Neighbour*);
 

@@ -327,7 +327,7 @@ struct t_args {
     int32_t threadid;
 };
 
-inline int32_t min(int32_t a, int32_t b)
+static int32_t min(int32_t a, int32_t b)
 { return (a<b)?a:b; }
 
 void*
@@ -351,11 +351,13 @@ thread_processAnts(void *args)
     Cost *localBest = malloc(sizeof(*localBest));
     *localBest = 0;
 
+    Pher *pheMatrix = malloc(sizeof(*pheMatrix) * NUM_ITEMS);
+
     while(localit--) {
+        memset(pheMatrix, 0, sizeof(*pheMatrix) * NUM_ITEMS);
 
         pthread_barrier_wait(&barrier);
 
-        Pher *pheMatrix = calloc(sizeof(*pheMatrix), NUM_ITEMS);
         for(i = ini; i < fin; i++)
         {
             ant_init(&ants[i]);
@@ -368,45 +370,26 @@ thread_processAnts(void *args)
         }
 
         pthread_barrier_wait(&barrier);
-       /*
-        if(tid == 0) {
-            evapPheromones();
-        }
-       */
+       
 
-        
         for(i = ini_items; i < fin_items; i++)
         {
             Item_evapPheromone(&universe[i]);
         }
-        
 
         pthread_barrier_wait(&barrier);
 
-/*        for(i = ini; i < fin; i++)
-        {
-            ant_getDeltaPherMatrix(&ants[i], &pheMatrix);
-            ant_fin(&ants[i]);
-        }
-*/
+
         ant_updPheromonesMatrix(&pheMatrix);
-        free(pheMatrix);
 
         pthread_barrier_wait(&barrier);
-
-        /*
-        if(tid == 0) {
-            for(ItemId i = 0; i < NUM_ITEMS; i++) {
-                Item_updatePdValue(&universe[i]);
-            }
-        }
-        */
+        
         for(i = ini_items; i < fin_items; i++) 
         {
             Item_updatePdValue(&universe[i]);
         }
     }
-
+    free(pheMatrix);
 
     return (void*)localBest;
 }
