@@ -18,6 +18,10 @@
 static int num_threads = 4;
 #endif
 
+#include <mpi.h>
+int wrank;
+int wsize;
+
 ItemId NUM_ITEMS;
 //Number of Restrictions for each item
 RestrId NUM_RESTRICTIONS;
@@ -53,8 +57,8 @@ Restr *cap_init;
 
 struct Item *universe;
 
-static int32_t num_iterations = 200;
-static int32_t num_ants = 100;
+int32_t num_iterations = 200;
+int32_t num_ants = 50;
 
 static char filename[255];
 
@@ -65,14 +69,6 @@ void process_cli(int argc, char **argv)
     {
         static struct option long_options[] =
         {
-/*
-            {"min_value", required_argument, 0, 'v'},
-            {"max_value", required_argument, 0, 'V'},
-            {"min_restrictions", required_argument, 0, 'r'},
-            {"max_restrictions", required_argument, 0, 'R'},
-            {"knap-cap", required_argument, 0, 'k'}, 
-            {"items", required_argument, 0, 't'},
-*/
             {"file", required_argument, 0, 'f'},
             {"pheromone", required_argument, 0, 'p'},
             {"evaporate", required_argument, 0, 'e'},
@@ -99,71 +95,6 @@ void process_cli(int argc, char **argv)
         {
             case 0:
                 break;
-/*              
-            case 'v':
-                {
-                    if(optarg){
-                        MIN_VALUE = atoi(optarg);
-                    }
-                }
-                break;
-            case 'V':
-                {
-                    if(optarg){
-                        MAX_VALUE = atoi(optarg);
-                    }
-                }
-                break;
-            case 'r':
-                {
-                    char *end;
-                    float64 f = 0.0;
-                    for(RestrId i = 0; i < NUM_RESTRICTIONS; i++)
-                    {
-                        f = strtod(optarg, &end);
-                        if(optarg == end) break;
-
-                        optarg = end;
-                        MIN_REST[i] = f;
-                    }
-                }
-                break;
-            case 'R':
-                {
-                    char *end;
-                    float64 f = 0.0;
-                    for(RestrId i = 0; i < NUM_RESTRICTIONS; i++)
-                    {
-                        f = strtod(optarg, &end);
-                        if(optarg == end) break;
-                        optarg = end;
-
-                        MAX_REST[i] = f;
-                    }
-                }
-                break;
-             case 't':
-                {
-                    if(optarg){
-                        NUM_ITEMS = atoi(optarg);
-                    }
-                }
-                break;
-            case 'k':
-                {
-                    char *end;
-                    float64 f = 0.0;
-                    for(RestrId i = 0; i < NUM_RESTRICTIONS; i++)
-                    {
-                        f = strtod(optarg, &end);
-                        if(optarg == end) break;
-                        optarg = end;
-
-                        cap_init[i] = f;
-                    }
-                }
-                break;
-*/
             case 'p':
                 {
                     if(optarg){
@@ -244,6 +175,7 @@ void process_cli(int argc, char **argv)
             case 'h':
             default:
                 {
+                    if(wrank==0){
                     printf("Options:\n");
 /*                    printf("\t--min_value <value>: Set minimum item worth\n");
                     printf("\t--max_value <value>: Set maximum item worth\n");
@@ -276,6 +208,7 @@ void process_cli(int argc, char **argv)
                             "\n\t"
                             "note: must be a power of two.\n");
 #endif
+                    }
                     exit(0);
                 }
                 break;
@@ -285,6 +218,7 @@ void process_cli(int argc, char **argv)
 
 
 
+    if(wrank == 0) {
     printf("Selected Values:\n");
 #ifdef THREADED
     printf("\tThreads: %"PRIi32"\n", num_threads);
@@ -314,11 +248,17 @@ void process_cli(int argc, char **argv)
     printf("\tIterations: %" PRIi32 "\n", num_iterations);
     printf("\tAnts: %" PRIi32 "\n", num_ants);
     printf("\n");
+    }
 
 
 }
 
+//comm_protocol.c
+extern Cost processAnts(int wrank, int wsize);
+//
+
 struct Ant (*ants);
+
 
 #ifdef THREADED
 static pthread_barrier_t barrier;
@@ -540,6 +480,12 @@ void createmknap(FILE *fd)
 
 int main(int argc, char **argv)
 {
+
+    MPI_Init(&argc, &argv);
+
+    MPI_Comm_rank(MPI_COMM_WORLD, &wrank);
+    MPI_Comm_size(MPI_COMM_WORLD, &wsize);
+
     setbuf(stdout, NULL);
 
     initDefaults();
@@ -583,17 +529,20 @@ int main(int argc, char **argv)
     gettimeofday(&start, NULL);
 
     //millisecond value of system clock to seed the RNG
-    srand((start.tv_sec)*1000 + (start.tv_usec)/1000);
+    srand((start.tv_sec)*1000 + (start.tv_usec)/1000 + wrank);
 
     Cost best = 0;
 
-    printf("Ant system starting\n");
+    if(wrank==0){
+        printf("Ant system starting\n");
+    }
     
     gettimeofday(&start, NULL);
     //struct Ant ants[num_ants];
-    ants = malloc(sizeof(*ants) * num_ants);
+    //ants = malloc(sizeof(*ants) * num_ants);
 
 #ifndef THREADED
+    /*
     int32_t it = num_iterations;
     while(it-- > 0){
        
@@ -617,6 +566,25 @@ int main(int argc, char **argv)
             Item_updatePdValue(&universe[i]);
         }
     }
+    */
+
+    Cost localBest = processAnts(wrank, wsize);
+    Cost bestBcast;
+    for(int i = 0; i < wsize; i++) {
+        if(wrank == i) {
+            bestBcast = localBest;
+        }
+
+        MPI_Bcast(&bestBcast, 1, MPI_INT, i, MPI_COMM_WORLD);
+        if(bestBcast > best) {
+            best = bestBcast;
+        }
+
+        if(wrank == 0) {
+            printf("[%i] Local Best: %i\n", i, bestBcast);
+        }
+    }
+
 #else
     struct t_args args[num_threads];
     for(int32_t i = 0; i < num_threads; i++) {
@@ -645,22 +613,24 @@ int main(int argc, char **argv)
     }
 
 #endif
-    gettimeofday(&stop, NULL);
+    if(wrank == 0) {
+        gettimeofday(&stop, NULL);
 
-    ldiv_t minsec = ldiv( (stop.tv_sec - start.tv_sec), 60);
+        ldiv_t minsec = ldiv( (stop.tv_sec - start.tv_sec), 60);
 
-    if(minsec.quot > 0){
-        printf("Ant system finished in %lim %lis %lims\n",
-                minsec.quot, minsec.rem, 
-                labs((stop.tv_usec - start.tv_usec)/1000));
+        if(minsec.quot > 0){
+            printf("Ant system finished in %lim %lis %lims\n",
+                    minsec.quot, minsec.rem, 
+                    labs((stop.tv_usec - start.tv_usec)/1000));
+        }
+        else{
+            printf("Ant system finished in %lis %lims\n",
+                minsec.rem,
+                labs((stop.tv_usec - start.tv_usec)/1000) );
+        }
+
+        printf("Best result found: %" PRIi32 "\n", best);
     }
-    else{
-        printf("Ant system finished in %lis %lims\n",
-            minsec.rem,
-            labs((stop.tv_usec - start.tv_usec)/1000) );
-    }
-
-    printf("Best result found: %" PRIi32 "\n", best);
 
     delete_universe();
 
@@ -668,6 +638,7 @@ int main(int argc, char **argv)
     pthread_barrier_destroy(&barrier);
 #endif
 
+    MPI_Finalize();
 }
 
 
