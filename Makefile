@@ -1,11 +1,11 @@
 IDIR=.
 CC=mpicc
-CFLAGS=-I$(IDIR) -Wall -Wextra -pedantic -g -O2
+CFLAGS=-I$(IDIR) -Wall -Wextra -pedantic -g -O2 -std=c11
 
  
 ODIR=./obj
 
-LIBS=-lm -lpthread
+LIBS=-lm 
 
 _DEPS = util.h item.h knapsack.h ant.h const.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))

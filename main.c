@@ -145,6 +145,7 @@ void process_cli(int argc, char **argv)
                 {
                     if(optarg){
                         num_ants = atoi(optarg);
+                        num_ants /= wsize;
                     }
                 }
                 break;
@@ -246,7 +247,7 @@ void process_cli(int argc, char **argv)
     printf("\tEvap coef: %.2f\n", PHE_EVAP);
     printf("\tAlpha: %.2f Beta: %.2f\n", PHE_WEIGHT, DES_WEIGHT);
     printf("\tIterations: %" PRIi32 "\n", num_iterations);
-    printf("\tAnts: %" PRIi32 "\n", num_ants);
+    printf("\tAnts: %" PRIi32 " per node\n", num_ants);
     printf("\n");
     }
 
