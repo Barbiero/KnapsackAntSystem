@@ -3,7 +3,8 @@
 #include <string.h>
 #include <getopt.h>
 #include <math.h>
-#include <sys/time.h>
+//#include <sys/time.h>
+#include <time.h>
 #include <errno.h>
 
 #include "ant.h"
@@ -526,11 +527,14 @@ int main(int argc, char **argv)
     readmknap(fd);
     fclose(fd);
 
+
+    clock_t start, end;
+/*
     struct timeval start, stop;
     gettimeofday(&start, NULL);
-
+*/
     //millisecond value of system clock to seed the RNG
-    srand((start.tv_sec)*1000 + (start.tv_usec)/1000 + wrank);
+    srand( time(NULL) + wrank );
 
     Cost best = 0;
 
@@ -538,7 +542,8 @@ int main(int argc, char **argv)
         printf("Ant system starting\n");
     }
     
-    gettimeofday(&start, NULL);
+    //gettimeofday(&start, NULL);
+    start = clock();
     //struct Ant ants[num_ants];
     //ants = malloc(sizeof(*ants) * num_ants);
 
@@ -615,19 +620,21 @@ int main(int argc, char **argv)
 
 #endif
     if(wrank == 0) {
-        gettimeofday(&stop, NULL);
+        end = clock();
+        double time = (double) (end - start) / CLOCKS_PER_SEC * 1000.0;
 
-        ldiv_t minsec = ldiv( (stop.tv_sec - start.tv_sec), 60);
+        ldiv_t sec_ms = ldiv(time, 1000.0);
+        ldiv_t minsec = ldiv(sec_ms.quot, 60);
 
         if(minsec.quot > 0){
             printf("Ant system finished in %lim %lis %lims\n",
                     minsec.quot, minsec.rem, 
-                    labs((stop.tv_usec - start.tv_usec)/1000));
+                    sec_ms.rem);
         }
         else{
             printf("Ant system finished in %lis %lims\n",
                 minsec.rem,
-                labs((stop.tv_usec - start.tv_usec)/1000) );
+                sec_ms.rem );
         }
 
         printf("Best result found: %" PRIi32 "\n", best);
