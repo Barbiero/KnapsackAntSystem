@@ -61,7 +61,21 @@ Dado então um número de iterações $iter$, um número de formigas $ants$ e um
 	\label{acoseq}
 \end{algorithm} 
 
-\section{Paralelização do \textit{ACO}}
+\section{Paralelização do \textit{ACO} no modelo de memória distribuída}
+Uma das vantagens de um modelo de memória distribuída é que precisa-se se preocupar apenas com a informação que \textit{deve} ser distribuída entre diferentes nós do processo. No caso do \textit{ACO}, se assumirmos que todos os nós em execução possuem acesso a todos os itens do universo, e que todos os nós são capazes de construir uma solução dada um feromônio, nota-se que a única váriavel é de fato compartilhada e modificada entre as formigas é o feromônio em si: $\tau_j$ depende de cada solução encontrada por cada formiga, porém todas as outras variáveis, inclusive o composto entre Feromônio e Desejabilidade $\tau_j^\alpha \mu_j^\beta$, podem ser calculadas antes ou depois de se determinar o valor do feromônio em uma dada iteração.
+
+\subsection{Lista de atualização de feromônio}
+Quando um conjunto de formigas termina sua iteração - isto é, encontram uma solução válida e estão prontas para atualizar o feromônio - é possível criar uma lista $\Delta\tau_j \forall{j}$ tal o índice $j$ indica qual será a diferença linear do feromônio após a evaporação com o feromônio após o término da atualização. Esta lista é relativamente pequena - cada elemento pode ser dado por um par \texttt{\{int, double\}} que tem um tamanho de 12 bytes na maioria dos sistema; e uma lista de atualização iria conter apenas os itens que irão, de fato, receber um aumento de feromônio além da evaporação; Isto é especialmente útil pois no problema da mochila, apenas um subconjunto pequeno de itens é incluso na mochila em um grande universo.
+
+\subsection{Envio da Mensagem}
+Pode-se então utilizar a função \texttt{Broadcast} para enviar a lista de feromônios para todos os nós do sistema, onde cada nó possui um subconjunto de formigas(em geral, ${num\_ants}\div{num\_nos}$). Assim, cada nó irá receber as listas de todos os outros nós, onde então todos os nós irão somar as partes das listas para atualizar suas listas locais de feromônio - minimizando, assim, o tamanho e número de mensagens a serem enviadas no sistema.
+
+Finalmente, ao término do programa(neste caso, do número de iterações), os nós podem então enviar seus melhores resultados ao nó de rank $0$ para que este possa finalizar a execução do programa com o resultado geral final.
+
+
+
+
+
 A forma mais intuitiva de se paralelizar o \textit{ACO} é em paralelizar as formigas, ou seja, enviar as formigas em \textit{threads} separadas para que trabalhem de forma concorrente. Durante a construção de solução, não existem problemas de concorrência: variáveis globais como $\tau_i$ não são modificadas.
 
 \subsection{Regiões críticas}
@@ -71,11 +85,10 @@ Isto indica que o algoritmo irá se beneficiar do uso de \textbf{barreiras}, imp
 
 \begin{algorithm}[ht]
 		\KwIn{\\
-			$barreira$: Estrura de barreira inicializada antes da criação das Threads\\
-			$T$: O numero total de threads\\
-			$threadid$: O identificador da thread, $0\leq threadid \leq T$\\
+			$N$: O numero total de nós\\
+			$rank$: O identificador do nó no comunicador global, $1\leq rank \leq N$\\
 			$iter$: Número de iterações do sistema\\
-			$ants$: Número de formigas do sistema\\
+			$ants$: Número de formigas por nó, onde $ants * N$ dá o número total de formigas\\
 			$n$: Número de itens\\
 			$m$: Número de restrições\\
 			$C_k, 0<k<m$: Capacidade da mochila\\
@@ -91,107 +104,49 @@ Isto indica que o algoritmo irá se beneficiar do uso de \textbf{barreiras}, imp
 		
 		\KwOut{$S$: estado da mochila na solução final}
 		
-		$ini_{ant} \gets threadid * \lceil\frac{ants}{T}\rceil$\;
-		$fin_{ant} \gets \min(ini_{ant} + \lceil\frac{ants}{T}\rceil, ants)$\;
-		$ini_{item} \gets threadid * \lceil\frac{n}{T}\rceil$\;
-		$fin_{item} \gets \min(ini_{item} + \lceil\frac{n}{T}\rceil, n)$\;
 		
 		$\forall_{0<j<n} \tau_j \gets \varphi$\;
 		\While{$iter{-}{-} > 0$ }{
 			$best_x\gets\emptyset \qquad \forall_{0<x<ants}$\;
 			\BlankLine
-			\texttt{buscar\_solucao($best_x, best$)(\ref{algbuscaSol})}\;
-			barreira\_esperar($barreira$)\;
+			\For{$x\gets 1 $\textbf{ to }$ ants$}{
+				$solucao\gets constroi\_solucao()$\;
+				\If{($solucao > best_x$)}{$best_x\gets solucao$}
+			}
+			$\Delta\tau_j \gets \Delta\tau(best_x) \qquad \forall_j \in best$ \;
+			$\Delta\tau' \gets \Delta\tau$
 			\BlankLine
-			\texttt{evap\_feromonio()(\ref{algevapPher})}\;
-			barreira\_esperar($barreira$)\;
-			\BlankLine
-			\texttt{atualiza\_feromonio($best_x$)(\ref{algupdPher})}\;
-			barreira\_esperar($barreira$)\;
+			\For{$i \gets 1 $ \textbf{to} $ N$}{
+				$\Delta\phi <- \emptyset$\;
+				\If{$rank = i$}{
+					$\Delta\phi <- \Delta\tau'$\;	
+				}
+				\texttt{Broadcast}($\Delta\phi, i$, \texttt{MPI\_COMM\_WORLD})\;
+				$\Delta\tau \gets \Delta\tau + \Delta\phi$\;
+			}
 			
-			\For{$j\gets ini_{item}$ \textbf{to} $ fin_{item}$}{
+			\For{$j \gets 1$ \textbf{to} $ n$}{
+				$\tau_j \gets \tau_j * \rho + \Delta\tau_j$\;
 				Atualizar $\tau_j^\alpha \mu_j^\beta$\;
 			}
-			barreira\_esperar($barreira$)\;
 		}
 		return $best$\;
 		\caption{Algoritmo de uma thread para o ACO}
 		\label{acopar}
 \end{algorithm}
 
-\begin{algorithm}[htb]
-	\For{$x\gets ini_{ant} $\textbf{ to }$ fin_{ant}$}{
-		$solucao\gets constroi\_solucao()$\;
-		\If{($solucao > best_x$)}{$best_x\gets solucao$}
-		\If{($solucao > best$)}{$best\gets solucao$}	
-	}
-	\caption{Busca de solução no algoritmo paralelo}
-	\label{algbuscaSol}
-\end{algorithm}
-\begin{algorithm}[htb]
-	\For{$j\gets ini_{item}$ \textbf{to} $ fin_{item}$}{
-		$\tau_j \gets \tau_j * \rho$\;
-	}
-	\caption{Evaporar Feromonios no algoritmo paralelo}
-	\label{algevapPher}
-\end{algorithm}
-\begin{algorithm}[htb]
-	\For{$x\gets ini_{ant}$ \textbf{to} $ fin_{ant}$}{
-		\ForEach{$i$: Item $\in best_x$}{
-			\texttt{lock($\tau_i$)}\;
-			$\tau_i \gets \Delta\tau(best_x)$\;	
-			\texttt{unlock($\tau_i$)}\;
-		}
-	}
-	\caption{Atualizar feromonios no algoritmo paralelo}
-	\label{algupdPher}
-\end{algorithm}
-
-\subsection{Seleção de Formigas}
-Dado um número qualquer de formigas, pode-se distribui-las entre as threads quase-igualmente(com uma exceção para a última thread, caso $ants\mod T \neq 0$) com duas operações:
-\begin{align}
-ini_{ant} \gets &threadid * \lceil\frac{ants}{T}\rceil\nonumber\\
-fin_{ant} \gets &\min(ini_{ant} + \lceil\frac{ants}{T}\rceil, ants)\nonumber
-\end{align}
-Assim, enquanto um programa que atinge todas as formigas irá iterar sobre as formigas $[0,ants)$, as threads irão iterar igualmente sobre $[ini_{ant}, fin_{ant})$. Além disso, as operações que ocorrem sobre os $n$ itens são analogamente distribuídas entre as threads, onde cada thread irá processar os itens $[ini_{item}, fin_{item})$
-
 \subsection{Análise de desempenho}
-O programa foi implementado na linguagem \texttt{C}, padrão \texttt{C11}, compilado com gcc versão 5.3.0 sob otimização \texttt{-O2}, e executado em um notebook \textbf{Dell Inspiron 14z 5423}, que possui um processador \textbf{i5 3317U 1.7GHz}. Este processador possui dois núcleos físicos e dois virtuais, totalizando quatro núcleos de processamento, com um cache de 128KB/512KB/3072KB para L1/L2/L3 respectivamente. A execução ocorreu no sistema operacional Elementary OS "freya", baseado no Ubuntu 14.04.
+O programa foi implementado na linguagem \texttt{C}, padrão \texttt{C11}, compilado com gcc versão 5.3.0 sob otimização \texttt{-O2}, e executado em um e duas máquinas com processador \textbf{i7 @ 3.5GHz}. A execução ocorreu no sistema operacional Ubuntu 14.04.
 
-Para a coleta de dados de desempenho, o programa foi executado utilizando 1, 2, 4 e 8 threads cada um executados 10 vezes, e mais 10 vezes com uma versão não paralela do programa(ou seja, sem a inclusão da biblioteca \texttt{pthreads} ou qualquer mecanismo de paralelismo). O tempo reportado foi coletado com um cronometro implementado dentro do programa, e não inclui o tempo de processamento não relevante à execução do algoritmo(por exemplo, leitura de dados de entrada). A tabela \ref{tab:tempos} mostra o resultado da coleta de dados.
+Para a coleta de dados, o programa foi executado em 1, 2, 3, 4, 8 e 16 nós, sendo testado o desempenho com uma distribuição de instâncias por máquina e por \textit{slot}, limitando cada máquina a 4 slots. Um gráfico do \textit{speedup} de cada instância pode ser verificado na figura \ref{Speedup}.
 
-\begin{table} [ht]
-	\centering
-	\caption{Tempo de execução médio (10 execuções)}
-	\label{tab:tempos}
-	\begin{tabular}{|c|c|c|c|c|}
-		\hline
-		\textbf{Nº de } & {\bf Média } & 
-		{\bf Desvio Padrão} & {\bf Speedup}& \textbf{Speedup}\\
-		Threads & de tempo & ($\sigma$) & (vs sequencial) & (vs 1 thread)\\
-		\hline
-		Sequencial & 4'42"114 & 12"070 & 1 & --\\
-		\hline
-		1 & 6'3"115 & 1"853 & 0.777 & 1 \\
-		\hline
-		2 & 3'23"765 & 10"734 & 1.260 & 1.628 \\
-		\hline
-		4 & 3'16"29 & 7"888 & 1.439 & 1.852 \\
-		\hline
-		8 & 4'11"818 & 1"579 & 1.120 & 1.442\\
-		\hline
-	\end{tabular}
-\end{table}
+\input{outplot}
 
-Nota-se que existe uma perda de desempenho relativo ao aumentar o número de Threads; Idealmente, a coluna de \textit{Speedup} deveria se aproximar ao número de threads. Entretanto, no caso de teste existem alguns problemas que causam uma perda de desempenho. Primeiramente, em uma arquitetura com apenas 4 núcleos de processamento, é natural que, ao passar desse número de threads, exista uma perda de processamento. Isto é visualizado com o fato de 8 threads serem mais lentas do que 4 threads.
+Imediatamente nota-se que existe uma \textit{Superlinearidade} no \textit{speedup} dos programas em uma instância em particular: Quando o número de nós é igual ao número total de núcleos físicos de processamento. A hipótese deste fenômeno ter ocorrido se dá ao modo em que o processador i7 se comporta quando sobre uma grande carga de processos ou com o modo em que o sistema operacional escalona os processos quando nesta instância em específica. Testes de outras instâncias não registrados mostram um padrão neste fenômeno em que o speedup superlinear é diretamente relacionado a este número de processos(4 por máquina).
 
-Além disso, existe uma grande perda de desempenho com o \textit{overhead} do paralelismo - isto é verificado com a diferença de tempo entre o programa Sequencial e de 1 Thread. Em particular, a existência de um lock para cada $\tau_j$ causa um overhead notável.
+Nota-se também o fenômeno mais esperado de que, ao passar do número de processadores físicos, ocorre uma queda na eficiência de processamento pois o sistema estará passando uma grande quantidade de tempo escalonando os processos - ocorrendo um slowdown perceptível quando o número de processos começa a ficar muito maior do que o número de núcleos de processamento.
 
-Em seguida, nota-se uma perda de desempenho entre 2 e 4 threads. Enquanto um Speedup de 1.628 para 2 threads é \textit{aceitável}(porém possivelmente melhorável, se o código implementado), o speedup de apenas 1.852 para quatro threads é extremamente baixo - esta perda de desempenho é uma consequencia do \textit{overhead} em conjunto com o fato de que o computador utilizado possui dois núcleos \textit{virtuais}, que dividem memória com seus núcleos físicos - e com a divisão de memória, existe um número maior de erros de cache.
+Atribui-se o alto desempenho ao fato de que as mensagens passadas são pequenas e rapidamente processadas entre nós; Além disso, os computadores se encontravam fisicamente próximos e é esperado que uma rede mais congestionada ou esparsa, ou mesmo um aumento no número de máquinas, causaria uma perda de eficácia em relação às instâncias testadas. Mesmo assim, o ganho de tempo no processamento distribuído para uma instância suficientemente grande sobrepõe qualquer perda de eficácia gerada por uma rede esparsa.
 
-\subsection{Possíveis otimizações}
-O programa foi escrito com suporte a um número dinâmico de itens e de restrições. Em \texttt{C}, isto significa que não é possível alinhar precisamente os dados dos itens com os dados de suas restrições: como estes não são definidos a tempo de compilação, é necessário alocá-los em tempo de execução o que implica que a memória das restrições $r_{ij}$ não ficará alinhada corretamente à estrutura do item $i$; Isto significa que todas as operações sobre um item que leva em consideração suas restrições causarão uma grande quantidade de misses de cache.
 
-Outra possível otimização seria considerar o feromônio como uma matriz individual a cada thread. Isto significaria que não seria necessário correr os problemas de corrida para atualizar o feromônio, e que cada thread agiria como uma colônia de formigas independente.
-
-A implementação do projeto está disponível em \url{https://github.com/Barbiero/KnapsackAntSystem}.
+A implementação do projeto está disponível em \url{https://github.com/Barbiero/KnapsackAntSystem/tree/mpibranch}.

@@ -23,8 +23,7 @@
 
 \selectlanguage{english}
 \begin{abstract}
-	This report describes the process of parallelizing the Ant Colonization Optimization algorithm used to solve the Multiple-Constraint Knapsack problem. The process included separating the ant-structures into different threads, and it was noted that the speedup of the application was affected not only by the number of threads, but also by the memory organization and modelling of the problem. 
-	It was also noted that there was a smaller variance in execution time the more threads were used, but that increasing the number of threads does not necessarily mean in a smaller execution time. This report does not go into detail of methods of solving the Knapsack problem nor does it go into detail of different Ant Systems, and uses a very simplified algorithm.
+	This report describes the process of parallelizing the Ant Colonization Optimization algorithm, used to solve the Multiple-Constraint Knapsack problem, through a distributed memory model. It was noted that, given a sufficiently small message size that the overhead from this model is negligible, achieving very high speedup factors. It was also noted that at certain instances, there was a super-linear speedup and it was hipotesized that this happens due to the hyper-threading technology provided on the Intel i7 processor, but no conclusion was reached from this phenomenom.
 	
 \end{abstract}
 

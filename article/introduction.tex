@@ -3,4 +3,4 @@
 	
 	O problema em questão é nomeado \textit{Problema da Mochila de Múltiplas Restrições}, em inglês \textit{Multiple Knapsack Problem}. Este problema é uma variação do problema da mochila onde cada nó do grafo do problema representa um estado da mochila, e cada aresta representa a introdução de um novo item na mochila. Este problema foi mostrado como NP-Completo por Gens, G\cite{complexity}.
 	
-	Neste trabalho, iremos utilizar o \textit{ACO} para resolver o problema em questão, e então melhorar o tempo de solução do problema paralelizando alguns de seus passos, de tal forma que ele continue resolvendo o problema da mesma forma porém tirando vantagem das arquiteturas multi-processadoras atuais.
+	Neste trabalho, iremos utilizar o \textit{ACO} para resolver o problema em questão, e então melhorar o tempo de solução do problema criando múltiplas instâncias do programa de solução, tais que elas se comuniquem e resolvam o problema da mesma forma que em um programa sequencial, podendo ser escalada para diversas máquinas ou mesmo em diversos processadores de uma única máquina.

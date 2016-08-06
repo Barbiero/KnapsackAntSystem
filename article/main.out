@@ -6,16 +6,17 @@
 \BOOKMARK [2][-]{subsection.3.1}{Constru\347\343o da Solu\347\343o}{section.3}% 6
 \BOOKMARK [2][-]{subsection.3.2}{Atualiza\347\343o do Ferom\364nio}{section.3}% 7
 \BOOKMARK [2][-]{subsection.3.3}{Opera\347\365es de Daemon}{section.3}% 8
-\BOOKMARK [1][-]{section.4}{Paraleliza\347\343o de Algoritmos}{}% 9
-\BOOKMARK [2][-]{subsection.4.1}{Threads}{section.4}% 10
-\BOOKMARK [2][-]{subsection.4.2}{Mem\363ria compartilhada e condi\347oes de corrida}{section.4}% 11
-\BOOKMARK [2][-]{subsection.4.3}{Locks}{section.4}% 12
-\BOOKMARK [2][-]{subsection.4.4}{Barreiras}{section.4}% 13
-\BOOKMARK [2][-]{subsection.4.5}{Leituras Adicionais}{section.4}% 14
-\BOOKMARK [1][-]{section.5}{Aplicando o Problema da Mochila ao Ant System}{}% 15
-\BOOKMARK [1][-]{section.6}{Paraleliza\347\343o do ACO}{}% 16
-\BOOKMARK [2][-]{subsection.6.1}{Regi\365es cr\355ticas}{section.6}% 17
-\BOOKMARK [2][-]{subsection.6.2}{Sele\347\343o de Formigas}{section.6}% 18
-\BOOKMARK [2][-]{subsection.6.3}{An\341lise de desempenho}{section.6}% 19
-\BOOKMARK [2][-]{subsection.6.4}{Poss\355veis otimiza\347\365es}{section.6}% 20
-\BOOKMARK [1][-]{section.7}{Conclus\365es}{}% 21
+\BOOKMARK [1][-]{section.4}{Paraleliza\347\343o do Algoritmo em Mem\363ria Distribu\355da}{}% 9
+\BOOKMARK [2][-]{subsection.4.1}{Conceitos b\341sicos do MPI}{section.4}% 10
+\BOOKMARK [3][-]{subsubsection.4.1.1}{Comunicadores}{subsection.4.1}% 11
+\BOOKMARK [3][-]{subsubsection.4.1.2}{Rank \046 Size}{subsection.4.1}% 12
+\BOOKMARK [3][-]{subsubsection.4.1.3}{Send, Receive, Broadcast}{subsection.4.1}% 13
+\BOOKMARK [2][-]{subsection.4.2}{Distribui\347\343o de Inst\342ncias e Execu\347\343o}{section.4}% 14
+\BOOKMARK [2][-]{subsection.4.3}{Leituras Adicionais}{section.4}% 15
+\BOOKMARK [1][-]{section.5}{Aplicando o Problema da Mochila ao Ant System}{}% 16
+\BOOKMARK [1][-]{section.6}{Paraleliza\347\343o do ACO no modelo de mem\363ria distribu\355da}{}% 17
+\BOOKMARK [2][-]{subsection.6.1}{Lista de atualiza\347\343o de ferom\364nio}{section.6}% 18
+\BOOKMARK [2][-]{subsection.6.2}{Envio da Mensagem}{section.6}% 19
+\BOOKMARK [2][-]{subsection.6.3}{Regi\365es cr\355ticas}{section.6}% 20
+\BOOKMARK [2][-]{subsection.6.4}{An\341lise de desempenho}{section.6}% 21
+\BOOKMARK [1][-]{section.7}{Conclus\365es}{}% 22
